@@ -1,7 +1,8 @@
 {
   "name": "LithiumOS",
   "short_name": "Lithium",
-  "start_url": "./#/station",
+  "start_url": "/LithiumOS/#/station",
+  "scope": "/LithiumOS/",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
