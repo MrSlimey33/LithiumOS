@@ -1,31 +1,41 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Calculator, FileText, Settings, Store, CloudSun, Camera, Wifi, Battery, Search, Lock, Mic, Image as ImageIcon, MessageSquare, Clock, Music, Terminal, Shield, Activity, LocateFixed, Radio, Box, Globe, Cpu, Palette, Navigation, Zap, Plus, ChevronRight, Share, Trash, Folder } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Calculator, FileText, Settings, Store, CloudSun, Camera, Wifi, Battery, Search, Lock, Mic, Image as ImageIcon, MessageSquare, Clock, Music, Terminal, Shield, Activity, LocateFixed, Box, Globe, Cpu, Palette, Zap, Plus, ChevronRight, Folder, X, Minus, Maximize2, LogOut, ChevronLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 const REG = {
-  camera: { n: 'Lens', ic: Camera, c: 'bg-rose-50 text-rose-600', d: 0 },
-  photos: { n: 'Gallery', ic: ImageIcon, c: 'bg-blue-50 text-blue-600', d: 0 },
-  terminal: { n: 'Console', ic: Terminal, c: 'bg-slate-800 text-slate-100', d: 0 },
-  media: { n: 'Synthesia', ic: Music, c: 'bg-emerald-50 text-emerald-600', d: 0 },
-  browser: { n: 'Nexus', ic: Globe, c: 'bg-indigo-50 text-indigo-600', d: 0 },
-  notes: { n: 'Notes', ic: FileText, c: 'bg-yellow-50 text-yellow-600', d: 0 },
-  calc: { n: 'Compute', ic: Calculator, c: 'bg-amber-50 text-amber-600', d: 0 },
-  clock: { n: 'Chrono', ic: Clock, c: 'bg-stone-50 text-stone-600', d: 0 },
-  vault: { n: 'Vault', ic: Shield, c: 'bg-red-50 text-red-600', d: 0 },
-  weather: { n: 'Atmo', ic: CloudSun, c: 'bg-sky-50 text-sky-600', d: 1 },
-  cpu: { n: 'Metrics', ic: Activity, c: 'bg-teal-50 text-teal-600', d: 1 },
-  canvas: { n: 'Canvas', ic: Palette, c: 'bg-fuchsia-50 text-fuchsia-600', d: 1 },
-  memos: { n: 'Voice', ic: Mic, c: 'bg-orange-50 text-orange-600', d: 1 },
-  store: { n: 'Market', ic: Store, c: 'bg-cyan-50 text-cyan-600', d: 0 },
-  settings: { n: 'System', ic: Settings, c: 'bg-slate-100 text-slate-700', d: 0 },
-  radar: { n: 'Radar', ic: LocateFixed, c: 'bg-emerald-50 text-emerald-600', d: 1 },
+  terminal: { n: 'Console', ic: Terminal, c: 'from-slate-800 to-slate-900', t: 'text-slate-100', d: 0 },
+  calc: { n: 'Compute', ic: Calculator, c: 'from-amber-400 to-orange-500', t: 'text-white', d: 0 },
+  notes: { n: 'Notes', ic: FileText, c: 'from-yellow-300 to-yellow-500', t: 'text-yellow-900', d: 0 },
+  settings: { n: 'System', ic: Settings, c: 'from-slate-300 to-slate-400', t: 'text-slate-800', d: 0 },
+  store: { n: 'Market', ic: Store, c: 'from-indigo-400 to-purple-500', t: 'text-white', d: 0 },
+  media: { n: 'Synthesia', ic: Music, c: 'from-emerald-400 to-teal-500', t: 'text-white', d: 0 },
+  vault: { n: 'Vault', ic: Shield, c: 'from-red-400 to-rose-600', t: 'text-white', d: 0 },
+  clock: { n: 'Chrono', ic: Clock, c: 'from-stone-700 to-stone-900', t: 'text-slate-200', d: 0 },
+  canvas: { n: 'Canvas', ic: Palette, c: 'from-fuchsia-400 to-pink-500', t: 'text-white', d: 1 },
+  browser: { n: 'Nexus', ic: Globe, c: 'from-blue-400 to-cyan-500', t: 'text-white', d: 1 },
+  camera: { n: 'Lens', ic: Camera, c: 'from-rose-300 to-pink-400', t: 'text-white', d: 1 },
+  photos: { n: 'Gallery', ic: ImageIcon, c: 'from-sky-300 to-blue-500', t: 'text-white', d: 1 },
+  weather: { n: 'Atmo', ic: CloudSun, c: 'from-cyan-300 to-sky-400', t: 'text-white', d: 1 },
+  cpu: { n: 'Metrics', ic: Activity, c: 'from-teal-300 to-emerald-400', t: 'text-white', d: 1 },
+  memos: { n: 'Voice', ic: Mic, c: 'from-orange-300 to-red-400', t: 'text-white', d: 1 },
+  radar: { n: 'Radar', ic: LocateFixed, c: 'from-lime-400 to-green-500', t: 'text-white', d: 1 },
 };
 
 const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-const playSound = (t, e) => {
+const playSound = (type, e) => {
   if (e?.target?.closest('input') || audioCtx.state === 'suspended') return;
   const o = audioCtx.createOscillator(), g = audioCtx.createGain();
   o.connect(g); g.connect(audioCtx.destination);
-  if (t === 'click') { o.type='sine'; o.frequency.setValueAtTime(800, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime+0.05); g.gain.setValueAtTime(0.05, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.05); o.start(); o.stop(audioCtx.currentTime+0.05); }
+  if (type === 'click') { 
+    o.type='sine'; o.frequency.setValueAtTime(800, audioCtx.currentTime); o.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime+0.05); 
+    g.gain.setValueAtTime(0.05, audioCtx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.05); 
+    o.start(); o.stop(audioCtx.currentTime+0.05); 
+  } else if (type === 'open') {
+    o.type='sine'; o.frequency.setValueAtTime(300, audioCtx.currentTime); o.frequency.linearRampToValueAtTime(600, audioCtx.currentTime+0.1); 
+    g.gain.setValueAtTime(0, audioCtx.currentTime); g.gain.linearRampToValueAtTime(0.05, audioCtx.currentTime+0.05); g.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.2); 
+    o.start(); o.stop(audioCtx.currentTime+0.2);
+  }
 };
 
 function useVDisk(key, init) {
@@ -34,259 +44,188 @@ function useVDisk(key, init) {
   return [v, setVal];
 }
 
-// --- WINDOW MANAGER ---
-function Window({ w, focus, close, min, max, children }) {
-  const [pos, setPos] = useState({ x: w.x, y: w.y });
-  const [dragging, setDragging] = useState(false);
-  const offset = useRef({ x: 0, y: 0 });
-  
-  const startDrag = (e) => { focus(w.id); if (w.max) return; setDragging(true); offset.current = { x: e.clientX - pos.x, y: e.clientY - pos.y }; };
-  const onDrag = useCallback((e) => { 
-    if (!dragging) return;
-    const cw = window.innerWidth, ch = window.innerHeight;
-    setPos({ x: Math.max(-w.w/2, Math.min(e.clientX - offset.current.x, cw - 50)), y: Math.max(28, Math.min(e.clientY - offset.current.y, ch - 80)) });
-  }, [dragging, w.w]);
-  
-  const endDrag = useCallback(() => setDragging(false), []);
-  useEffect(() => { if (dragging) { window.addEventListener('mousemove', onDrag); window.addEventListener('mouseup', endDrag); return () => { window.removeEventListener('mousemove', onDrag); window.removeEventListener('mouseup', endDrag); }; } }, [dragging, onDrag, endDrag]);
-  
+// --- WINDOW MANAGER (Desktop) ---
+function Window({ w, focus, close, min, max, children, constraintsRef }) {
   if (w.min) return null;
   const Ic = w.ic;
   return (
-    <div className="absolute bg-white/85 backdrop-blur-3xl shadow-[0_30px_80px_rgba(0,0,0,0.15)] border border-white flex flex-col overflow-hidden transition-all duration-300 rounded-2xl will-change-[width,height,left,top]" style={{ left: w.max ? 0 : pos.x, top: w.max ? 28 : pos.y, width: w.max ? '100%' : w.w, height: w.max ? 'calc(100% - 28px)' : w.h, zIndex: w.z, transitionProperty: dragging ? 'none' : 'width, height, left, top' }} onMouseDown={() => focus(w.id)}>
-      <div className="h-12 bg-gradient-to-b from-white/90 to-white/40 border-b border-slate-200/50 flex items-center justify-between px-4 cursor-move shrink-0" onMouseDown={startDrag}>
-        <div className="flex gap-2">
-           <button onClick={(e)=>{e.stopPropagation(); close(w.id)}} className="w-3.5 h-3.5 rounded-full bg-rose-400 border border-rose-500 shadow-sm hover:bg-rose-500 flex items-center justify-center opacity-80 hover:opacity-100 transition-opacity" />
-           <button onClick={(e)=>{e.stopPropagation(); min(w.id)}} className="w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-500 shadow-sm hover:bg-amber-500 opacity-80 hover:opacity-100 transition-opacity" />
-           <button onClick={(e)=>{e.stopPropagation(); max(w.id)}} className="w-3.5 h-3.5 rounded-full bg-emerald-400 border border-emerald-500 shadow-sm hover:bg-emerald-500 opacity-80 hover:opacity-100 transition-opacity" />
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.9, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0, 
+                 width: w.max ? '100%' : w.w, 
+                 height: w.max ? '100%' : w.h, 
+                 x: w.max ? 0 : w.x, 
+                 y: w.max ? 0 : w.y,
+                 borderRadius: w.max ? '0px' : '24px'
+      }}
+      exit={{ opacity: 0, scale: 0.9, y: 20 }}
+      transition={{ type: "spring", stiffness: 350, damping: 30 }}
+      drag={!w.max}
+      dragConstraints={constraintsRef}
+      dragMomentum={false}
+      dragElastic={0.1}
+      onDragStart={() => focus(w.id)}
+      onMouseDown={() => focus(w.id)}
+      className="absolute bg-white/70 backdrop-blur-[50px] shadow-[0_40px_100px_rgba(0,0,0,0.2)] border border-white/60 flex flex-col overflow-hidden will-change-transform z-10"
+      style={{ zIndex: w.z, position: 'absolute' }}
+    >
+      <div className="h-14 bg-gradient-to-b from-white/80 to-white/30 border-b border-white/40 flex items-center justify-between px-5 w-full cursor-grab active:cursor-grabbing shrink-0 backdrop-blur-md">
+        <div className="flex gap-2.5">
+           <button onMouseDown={(e)=>{e.stopPropagation(); playSound('click',e); close(w.id)}} className="w-3.5 h-3.5 rounded-full bg-rose-400 border border-rose-500 shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)] flex items-center justify-center group"><X size={8} className="text-rose-900 opacity-0 group-hover:opacity-100 transition-opacity" /></button>
+           <button onMouseDown={(e)=>{e.stopPropagation(); playSound('click',e); min(w.id)}} className="w-3.5 h-3.5 rounded-full bg-amber-400 border border-amber-500 shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)] flex items-center justify-center group"><Minus size={8} className="text-amber-900 opacity-0 group-hover:opacity-100 transition-opacity"/></button>
+           <button onMouseDown={(e)=>{e.stopPropagation(); playSound('click',e); max(w.id)}} className="w-3.5 h-3.5 rounded-full bg-emerald-400 border border-emerald-500 shadow-[inset_0_1px_2px_rgba(255,255,255,0.4)] flex items-center justify-center group"><Maximize2 size={8} className="text-emerald-900 opacity-0 group-hover:opacity-100 transition-opacity"/></button>
         </div>
-        <div className="absolute left-1/2 -translate-x-1/2 text-slate-600 font-semibold tracking-wide text-xs flex items-center gap-2"><Ic size={14}/> {REG[w.id].n}</div>
+        <div className="absolute left-1/2 -translate-x-1/2 text-slate-700 font-semibold tracking-wide text-[13px] flex items-center gap-2 drop-shadow-sm"><Ic size={14} className="opacity-70"/> {REG[w.id].n}</div>
         <div className="w-12"/>
       </div>
-      <div className="flex-1 overflow-hidden relative bg-white/50" onMouseDown={e => e.stopPropagation()}>{children}</div>
-    </div>
+      <div className="flex-1 overflow-hidden relative bg-white/40 rounded-b-[24px]" onMouseDown={e => e.stopPropagation()}>{children}</div>
+    </motion.div>
   );
 }
 
 // --- CORE APPS ---
-function DynamicApp({ app }) {
-  const Ic = app.ic;
-  return <div className="w-full h-full bg-slate-50 flex flex-col items-center justify-center text-slate-400 p-8 text-center shadow-inner"><Ic size={64} className="mb-6 text-slate-200 opacity-50 drop-shadow-md" /><p className="font-semibold text-xl text-slate-700">{app.n} Disabled</p><p className="text-sm mt-3 opacity-70 max-w-xs">This module requires further dependencies. Install via Market to initialize the logic core.</p></div>;
-}
-
-function SettingsApp({ ins, un, lock }) {
-  return (
-    <div className="w-full h-full bg-slate-50/80 text-slate-800 p-6 overflow-y-auto font-sans">
-      <h2 className="text-3xl font-bold mb-8 tracking-tight flex items-center gap-3"><Settings className="text-slate-400"/> Preferences</h2>
-      <div className="bg-white rounded-2xl p-6 shadow-sm border border-slate-100 mb-8 flex items-center gap-6 relative overflow-hidden">
-         <div className="absolute top-0 right-0 w-32 h-32 bg-rose-100 rounded-full blur-3xl -z-10 opacity-50" />
-         <div className="w-20 h-20 rounded-full bg-gradient-to-br from-rose-50 to-white flex items-center justify-center shrink-0 border border-rose-100 shadow-sm"><Cpu size={40} className="text-rose-400"/></div>
-         <div><h3 className="font-bold text-2xl text-slate-900">Lithium Station</h3><p className="text-slate-500 font-medium">Kernel v4.2.1 • Memory 16GB</p></div>
-      </div>
-      <button onClick={(e)=>{playSound('click',e);lock()}} className="w-full bg-slate-900 text-white rounded-2xl py-4 font-bold tracking-wide shadow-xl shadow-slate-900/10 hover:-translate-y-1 hover:shadow-slate-900/20 active:scale-[0.98] transition-all mb-10">Lock Workstation</button>
-      <div className="mb-4 text-sm font-bold tracking-widest text-slate-400 uppercase">Installed Modules</div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {ins.map(id => {
-          if (REG[id]?.d !== 1) return null;
-          const Ic = REG[id].ic;
-          return (
-          <div key={id} className="bg-white rounded-2xl p-4 flex justify-between items-center shadow-sm border border-slate-100 hover:border-slate-300 transition-colors">
-            <span className="font-semibold text-slate-700 flex items-center gap-3"><div className={`w-8 h-8 rounded-full flex items-center justify-center ${REG[id].c}`}><Ic size={16}/></div>{REG[id].n}</span>
-            <button onClick={(e)=>{playSound('click',e); un(id)}} className="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold hover:bg-rose-100 active:scale-95 transition-transform">Delete</button>
-          </div>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-function StoreApp({ ins, setIns, shake }) {
-  return (
-    <div className="w-full h-full bg-slate-50 text-slate-800 flex flex-col p-8">
-      <h2 className="text-3xl font-bold mb-8 tracking-tight flex items-center gap-3"><Store className="text-indigo-400"/> Market</h2>
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 flex-1 overflow-y-auto px-1 pb-10">
-        {Object.keys(REG).filter(k => REG[k].d === 1 && !ins.includes(k)).map(id => {
-          const Ic = REG[id].ic;
-          return (
-          <div key={id} className="bg-white p-6 rounded-2xl border border-slate-100 shadow-[0_10px_30px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center text-center gap-3 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.06)] transition-all">
-            <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center ${REG[id].c} shadow-inner bg-opacity-50`}><Ic size={32}/></div>
-            <span className="font-bold text-slate-700">{REG[id].n}</span>
-            <button onClick={(e)=>{playSound('click',e); setIns([...ins, id]); shake();}} className="mt-3 text-xs font-bold tracking-widest bg-slate-900 text-white px-6 py-2 rounded-full hover:bg-indigo-600 transition-colors active:scale-95 shadow-md">GET</button>
-          </div>
-          );
-        })}
-        {Object.keys(REG).filter(k => REG[k].d === 1 && !ins.includes(k)).length === 0 && <div className="col-span-full h-full flex flex-col items-center justify-center text-slate-400 font-medium"><Zap size={48} className="mb-4 opacity-50"/>All modules acquired!</div>}
-      </div>
-    </div>
-  );
-}
-
-function NotesApp() {
-  const [notes, setNotes] = useVDisk('notes_db', [{id:1, title:'lithium.doc', text:'Welcome to Lithium Station.\nEdit me!'}]);
-  const [sel, setSel] = useState(1);
-  const cur = notes.find(n=>n.id===sel) || notes[0];
-  const update = (t) => setNotes(notes.map(n=>n.id===sel ? {...n, text:t} : n));
-  const mkNew = () => { const id=Date.now(); setNotes([...notes, {id, title:'untitled', text:''}]); setSel(id); };
-  return (
-    <div className="w-full h-full bg-white flex h-full">
-       <div className="w-64 bg-slate-50 border-r border-slate-100 flex flex-col">
-          <div className="p-4 border-b border-slate-100 flex justify-between items-center"><span className="font-bold text-slate-400 tracking-wider text-xs">ALL NOTES</span><button onClick={mkNew} className="p-1 hover:bg-slate-200 rounded text-slate-500 transition-colors"><Plus size={16}/></button></div>
-          <div className="flex-1 overflow-y-auto p-2 space-y-1">
-             {notes.map(n=>(<div key={n.id} onClick={()=>setSel(n.id)} className={`p-3 rounded-lg cursor-pointer text-sm font-semibold truncate transition-colors ${sel===n.id?'bg-amber-100 text-amber-800':'hover:bg-slate-100 text-slate-600'}`}>{n.title||'untitled'}</div>))}
-          </div>
-       </div>
-       <div className="flex-1 flex flex-col relative px-8 py-6">
-          <input value={cur?.title} onChange={e=>setNotes(notes.map(n=>n.id===sel?{...n,title:e.target.value}:n))} className="text-3xl font-bold text-slate-800 outline-none placeholder-slate-300 bg-transparent mb-6 transition-colors focus:text-slate-950" placeholder="Title..." />
-          <textarea value={cur?.text} onChange={e=>update(e.target.value)} className="flex-1 resize-none bg-transparent outline-none text-slate-600 text-base leading-relaxed placeholder-slate-200 font-serif" placeholder="Start typing here..."/>
-       </div>
-    </div>
-  );
-}
-
-function CanvasApp() {
-  const cRef = useRef(null); const ctxRef = useRef(null); const [md, setMd] = useState(false);
-  const [color, setColor] = useState('#f43f5e');
-  useEffect(()=>{if(cRef.current){const c=cRef.current; c.width=c.offsetWidth; c.height=c.offsetHeight; ctxRef.current=c.getContext('2d');}},[]);
-  const draw = (e)=>{if(!md||!ctxRef.current)return; const ctx=ctxRef.current; const r=cRef.current.getBoundingClientRect(); ctx.fillStyle=color; ctx.beginPath(); ctx.arc(e.clientX-r.left, e.clientY-r.top, 4, 0, Math.PI*2); ctx.fill();};
-  return (
-    <div className="w-full h-full bg-white flex flex-col relative">
-       <div className="h-14 border-b border-slate-100 flex items-center px-4 gap-2 bg-slate-50 shadow-sm z-10">
-          {['#f43f5e', '#3b82f6', '#10b981', '#f59e0b', '#1e293b'].map(c=>(<div key={c} onClick={()=>setColor(c)} className={`w-8 h-8 rounded-full cursor-pointer border-[3px] shadow-sm transition-transform hover:scale-110 active:scale-95 ${color===c?'border-white ring-2 ring-slate-400 scale-110':'border-transparent'}`} style={{background:c}}/>))}
-          <div className="mx-2 w-px h-6 bg-slate-200" />
-          <button onClick={()=>{ctxRef.current?.clearRect(0,0,cRef.current.width,cRef.current.height)}} className="text-xs font-bold text-slate-500 hover:text-slate-800 px-3 py-1 bg-white rounded-md border border-slate-200 shadow-sm active:bg-slate-100 transition-colors">CLEAR</button>
-       </div>
-       <canvas ref={cRef} onMouseDown={()=>setMd(true)} onMouseUp={()=>setMd(false)} onMouseLeave={()=>setMd(false)} onMouseMove={draw} className="flex-1 w-full bg-white cursor-crosshair" />
-    </div>
-  );
-}
-
-function MediaApp() {
-  const [playing, setPlaying] = useState(false);
-  const [step, setStep] = useState(0);
-  const notes = [261.63, 293.66, 329.63, 349.23, 392.00, 440.00]; 
-  const [grid, setGrid] = useState(Array(6).fill().map(()=>Array(16).fill(false)));
-  
-  useEffect(()=>{
-     let t;
-     if (playing) { t = setInterval(()=>{ setStep(s=>(s+1)%16); }, 200); }
-     return ()=>clearInterval(t);
-  }, [playing]);
-
-  useEffect(()=>{
-     if (playing && audioCtx.state !== 'suspended') {
-       grid.forEach((row, i) => {
-         if(row[step]){
-            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain();
-            osc.connect(gain); gain.connect(audioCtx.destination);
-            osc.type='sine'; osc.frequency.value = notes[i];
-            gain.gain.setValueAtTime(0.1, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime+0.5);
-            osc.start(); osc.stop(audioCtx.currentTime+0.5);
-         }
-       });
-     }
-  }, [step, playing, grid]); // eslint-disable-line
-
-  const toggle = (r,c)=>{const ng=[...grid]; ng[r][c]=!ng[r][c]; setGrid(ng); if(ng[r][c])playSound('click',{});};
-  
-  return (
-    <div className="w-full h-full bg-slate-900 text-slate-200 p-8 flex flex-col font-mono select-none overflow-y-auto">
-       <div className="flex justify-between items-center mb-8">
-          <div><h2 className="text-2xl font-bold text-white tracking-widest uppercase">Synthesia 4.0</h2><p className="text-emerald-400 text-xs mt-1">16-Step Audio Sequencer</p></div>
-          <button onClick={()=>{setPlaying(!playing); if(audioCtx.state==='suspended')audioCtx.resume();}} className={`w-16 h-16 rounded-full flex items-center justify-center transition-all ${playing?'bg-rose-500 shadow-[0_0_30px_rgba(244,63,94,0.4)]':'bg-emerald-500 shadow-[0_0_30px_rgba(16,185,129,0.4)]'}`}>
-             {playing ? <Box size={24} className="text-white"/> : <Play size={24} className="text-white ml-1"/>}
-          </button>
-       </div>
-       <div className="flex-1 flex flex-col gap-2">
-         {grid.map((r,i)=>(
-            <div key={i} className="flex gap-2">
-               {r.map((v,j)=>(
-                 <div key={j} onClick={()=>toggle(i,j)} className={`flex-1 aspect-[2/1] rounded-md border transition-all duration-75 cursor-pointer ${v?'bg-emerald-400 border-emerald-300 shadow-[0_0_15px_rgba(52,211,153,0.5)]':'bg-slate-800 border-slate-700 hover:bg-slate-700'} ${j===step&&playing?'ring-2 ring-white scale-110 z-10':''}`} />
-               ))}
-            </div>
-         ))}
-       </div>
-    </div>
-  );
-}
-
-function VaultApp() {
-  const [keys] = useState(() => { const arr=[]; for(let i=0;i<window.localStorage.length;i++){ if(window.localStorage.key(i).startsWith('LITHIUM_')) arr.push(window.localStorage.key(i)); } return arr; });
-  return (
-    <div className="w-full h-full bg-white flex flex-col p-6">
-       <div className="mb-6"><h2 className="text-3xl font-bold text-slate-800 tracking-tight flex items-center gap-3"><Folder className="text-blue-500" size={32}/> VDisk Vault</h2><p className="text-slate-500 mt-1">Local Sandboxed Sandbox</p></div>
-       <div className="grid grid-cols-3 gap-6">
-         {keys.length===0 && <p className="col-span-3 text-slate-400 font-medium">No storage volumes found.</p>}
-         {keys.map(k=>(
-           <div key={k} className="p-4 rounded-xl border border-slate-200 bg-slate-50 flex flex-col gap-2 shadow-sm hover:shadow-md transition-shadow">
-             <Database size={24} className="text-slate-400" />
-             <span className="font-semibold text-sm truncate text-slate-700">{k.replace('LITHIUM_','')}</span>
-             <span className="text-xs text-slate-400 font-mono">{(window.localStorage.getItem(k).length/1024).toFixed(2)} KB</span>
-           </div>
-         ))}
-       </div>
-    </div>
-  );
-}
-
-// Minimal versions of other apps...
 function TerminalApp() {
-  const [log, setLog] = useState(["> Lithium OS Kernel loaded.", "> Run 'help' for commands."]);
+  const [log, setLog] = useState(["> Lithium OS Kernel loaded.", "> Run 'help' for commands.", "> Connecting to primary node... OK"]);
   const [inp, setInp] = useState('');
   const run = (e) => {
     if (e.key === 'Enter' && inp) {
       playSound('click', e); let res = `> ${inp}`;
       if(inp === 'clear') setLog([]); 
-      else if(inp === 'help') setLog([...log, res, "Commands: clear, help, date, whoami"]);
+      else if(inp === 'help') setLog([...log, res, "Commands: clear, help, date, whoami, neofetch"]);
       else if(inp === 'date') setLog([...log, res, new Date().toString()]);
       else if(inp === 'whoami') setLog([...log, res, "root@lithium"]);
+      else if(inp === 'neofetch') setLog([...log, res, "   .o+`\n  `ooo/\n `+oooo:\n`+oooooo:\n-+oooooo+:\n Lithium OS 4.0\n Kernel: Web Native\n UI: AeroComposite"]);
       else { try { res += `\n< ${String(new Function('return ' + inp)())}`; } catch(err) { res += `\n< Err: ${err.message}`; } setLog([...log, res]); }
       setInp('');
     }
   };
   return (
-    <div className="w-full h-full bg-[#1e1e1e] text-[#d4d4d4] font-mono text-[13px] p-4 flex flex-col">
-      <div className="flex-1 overflow-y-auto whitespace-pre-wrap flex flex-col justify-end space-y-2 mb-2">
-        {log.map((l,i) => <div key={i}>{l}</div>)}
+    <div className="w-full h-full bg-[#0d1117] text-[#58a6ff] font-mono text-[13px] p-5 flex flex-col relative overflow-hidden isolate">
+      <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.05] pointer-events-none mix-blend-overlay"></div>
+      <div className="absolute inset-0 bg-gradient-to-b from-blue-900/10 to-transparent pointer-events-none" />
+      <div className="flex-1 overflow-y-auto whitespace-pre-wrap flex flex-col justify-end space-y-2 mb-3 relative z-10 scrollbar-hide">
+        {log.map((l,i) => <motion.div initial={{opacity:0, x:-5}} animate={{opacity:1, x:0}} key={i} className={l.startsWith('< Err') ? 'text-[#ff7b72]' : l.startsWith('<') ? 'text-[#3fb950]' : ''}>{l}</motion.div>)}
       </div>
-      <div className="flex border-t border-[#333] pt-2"><span className="mr-3 pl-1 text-emerald-400 font-bold">$</span><input autoFocus value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={run} className="flex-1 bg-transparent outline-none text-[#d4d4d4]" spellCheck="false" /></div>
+      <div className="flex border-t border-[#30363d] pt-3 relative z-10"><span className="mr-3 text-[#3fb950] font-bold">root@station:~$</span><input autoFocus value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={run} className="flex-1 bg-transparent outline-none text-[#c9d1d9]" spellCheck="false" /></div>
+    </div>
+  );
+}
+
+function NotesApp() {
+  const [notes, setNotes] = useVDisk('notes_db', [{id:1, title:'Idea Log', text:'Welcome to Lithium Notes.\nAuto-saved to your local VDisk.'}]);
+  const [sel, setSel] = useState(1);
+  const cur = notes.find(n=>n.id===sel) || notes[0];
+  const update = (t) => setNotes(notes.map(n=>n.id===sel ? {...n, text:t} : n));
+  const mkNew = () => { const id=Date.now(); setNotes([...notes, {id, title:'Untitled', text:''}]); setSel(id); };
+  return (
+    <div className="w-full h-full bg-slate-50/50 backdrop-blur-md flex h-full text-slate-800">
+       <div className="w-64 bg-slate-100/50 border-r border-slate-200/50 flex flex-col backdrop-blur-xl shrink-0">
+          <div className="p-5 flex justify-between items-center"><span className="font-bold text-slate-500 tracking-widest text-[10px] uppercase">All Notes</span><button onClick={mkNew} className="p-1.5 hover:bg-slate-200/80 rounded-lg text-slate-600 transition-colors shadow-sm bg-white/50"><Plus size={14}/></button></div>
+          <div className="flex-1 overflow-y-auto p-3 space-y-2">
+             {notes.map(n=>(<div key={n.id} onClick={()=>setSel(n.id)} className={`p-3 rounded-xl cursor-pointer text-sm font-semibold truncate transition-all border ${sel===n.id?'bg-white border-slate-200 shadow-sm text-slate-900':'bg-transparent border-transparent hover:bg-white/40 text-slate-500 hover:text-slate-700'}`}>{n.title||'Untitled'}</div>))}
+          </div>
+       </div>
+       <div className="flex-1 flex flex-col relative px-10 py-8 bg-white/60">
+          <input value={cur?.title} onChange={e=>setNotes(notes.map(n=>n.id===sel?{...n,title:e.target.value}:n))} className="text-4xl font-bold tracking-tight text-slate-900 outline-none placeholder-slate-300 bg-transparent mb-8 transition-colors" placeholder="Note Title..." />
+          <textarea value={cur?.text} onChange={e=>update(e.target.value)} className="flex-1 resize-none bg-transparent outline-none text-slate-700 text-lg leading-relaxed placeholder-slate-300 font-serif" placeholder="Start typing here..."/>
+       </div>
     </div>
   );
 }
 
 function CalculatorApp() {
   const [calc, setCalc] = useState('0');
-  const press = (b,e) => { playSound('click',e); if(b==='C')setCalc('0'); else if(b==='=')try{setCalc(String(new Function('return '+calc)()))}catch{setCalc('ERR')} else setCalc(calc==='0'||calc==='ERR'?b:calc+b); };
+  const press = (b,e) => { 
+    playSound('click',e); 
+    if(b==='C')setCalc('0'); 
+    else if(b==='=')try{setCalc(String(new Function('return '+calc)()).slice(0,12))}catch{setCalc('ERR')} 
+    else setCalc(calc==='0'||calc==='ERR'?b:calc.length<12?calc+b:calc); 
+  };
   return (
-    <div className="w-full h-full bg-slate-50 flex flex-col p-4 font-sans select-none">
-      <div className="bg-white rounded-2xl mb-4 flex-1 flex flex-col justify-end p-6 text-right border border-slate-200 shadow-inner overflow-hidden flex-shrink-0 min-h-[120px]">
-         <span className="text-5xl font-light text-slate-800 tracking-tighter break-all">{calc}</span>
+    <div className="w-full h-full bg-slate-100/80 flex flex-col p-6 font-sans select-none backdrop-blur-xl">
+      <div className="bg-white/80 backdrop-blur rounded-[2rem] mb-6 flex-1 flex flex-col justify-end p-8 text-right border border-white shadow-[0_10px_30px_rgba(0,0,0,0.05)] overflow-hidden flex-shrink-0 min-h-[140px]">
+         <span className="text-6xl font-light text-slate-800 tracking-tighter break-all">{calc}</span>
       </div>
-      <div className="grid grid-cols-4 gap-3 text-xl font-medium h-64 shrink-0">
+      <div className="grid grid-cols-4 gap-4 text-2xl font-medium h-72 shrink-0">
          {['C','/','*','-','7','8','9','+','4','5','6','=','1','2','3','0'].map(b => (
-           <button key={b} onClick={(e)=>press(b,e)} className={`rounded-xl shadow-sm border border-slate-200 active:scale-90 transition-transform ${b==='='?'row-span-2 bg-rose-500 text-white border-rose-600':b==='C'?'bg-slate-200 text-rose-500':b==='0'?'col-span-3':'bg-white hover:bg-slate-50 text-slate-700'}`}>{b}</button>
+           <button key={b} onClick={(e)=>press(b,e)} className={`rounded-[1.5rem] shadow-sm border active:scale-95 transition-all flex items-center justify-center ${b==='='?'row-span-2 bg-gradient-to-br from-orange-400 to-rose-500 text-white border-rose-500 shadow-rose-500/30 shadow-lg':b==='C'?'bg-slate-200/50 text-rose-500 border-slate-300/50 hover:bg-slate-200':b==='0'?'col-span-3 bg-white/90 border-white hover:bg-white':'bg-white/90 hover:bg-white text-slate-700 border-white'}`}>{b}</button>
          ))}
       </div>
     </div>
   );
 }
 
-function ClockApp() {
-  const [t, setT] = useState(new Date()); useEffect(() => { const i = setInterval(() => setT(new Date()), 1000); return () => clearInterval(i); }, []);
+function SettingsApp({ ins, un, lock }) {
   return (
-    <div className="w-full h-full bg-slate-900 flex flex-col items-center justify-center relative shadow-inner">
-       <div className="w-64 h-64 rounded-full relative flex items-center justify-center bg-slate-800 border-8 border-slate-700 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
-         <div className="absolute w-2 h-20 bg-white rounded-full origin-bottom" style={{ transform: `translateY(-50%) rotate(${t.getHours()*30 + t.getMinutes()*0.5}deg)` }} />
-         <div className="absolute w-1.5 h-28 bg-slate-300 rounded-full origin-bottom" style={{ transform: `translateY(-50%) rotate(${t.getMinutes()*6}deg)` }} />
-         <div className="absolute w-0.5 h-32 bg-rose-500 rounded-full origin-bottom" style={{ transform: `translateY(-50%) rotate(${t.getSeconds()*6}deg)` }} />
-         <div className="absolute w-4 h-4 bg-rose-500 rounded-full z-10 border-4 border-slate-900"/>
-         {[...Array(12)].map((_,i)=><div key={i} className="absolute w-1 h-3 bg-slate-500 rounded-full" style={{transform:`rotate(${i*30}deg) translateY(-110px)`}}/>)}
-       </div>
+    <div className="w-full h-full bg-slate-50/80 backdrop-blur-xl text-slate-800 p-8 overflow-y-auto font-sans relative">
+      <h2 className="text-4xl font-bold mb-10 tracking-tight flex items-center gap-4 text-slate-900"><Settings className="text-slate-400" size={36}/> System Settings</h2>
+      
+      <div className="bg-white/90 backdrop-blur rounded-[2rem] p-8 shadow-[0_10px_30px_rgba(0,0,0,0.02)] border border-white mb-10 flex items-center gap-8 relative overflow-hidden isolate">
+         <div className="absolute -top-10 -right-10 w-48 h-48 bg-cyan-100 rounded-full blur-[60px] -z-10 opacity-70" />
+         <div className="w-24 h-24 rounded-full bg-gradient-to-br from-cyan-50 to-white flex items-center justify-center shrink-0 border border-cyan-100 shadow-md"><Cpu size={40} className="text-cyan-500"/></div>
+         <div>
+            <h3 className="font-bold text-3xl text-slate-900 mb-1">Lithium Station</h3>
+            <p className="text-slate-500 font-medium text-lg">Kernel OS 4.2.0 • AeroComposite Engine</p>
+         </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+         <div className="bg-white/70 backdrop-blur p-6 rounded-3xl border border-white shadow-sm flex flex-col gap-4">
+            <h4 className="font-bold text-slate-800 text-lg flex items-center gap-2"><Lock size={18} className="text-rose-500"/> Security</h4>
+            <button onClick={(e)=>{playSound('click',e);lock()}} className="w-full bg-slate-900 text-white rounded-2xl py-4 font-bold tracking-wide shadow-xl shadow-slate-900/10 hover:-translate-y-1 hover:shadow-slate-900/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2">Lock Workstation</button>
+         </div>
+         <div className="bg-white/70 backdrop-blur p-6 rounded-3xl border border-white shadow-sm flex flex-col gap-4">
+            <h4 className="font-bold text-slate-800 text-lg flex items-center gap-2"><Globe size={18} className="text-blue-500"/> Network</h4>
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100"><span className="font-semibold text-slate-600 text-sm">LithiumNet</span><span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full">Connected</span></div>
+         </div>
+      </div>
+
+      <div className="mb-4 text-xs font-bold tracking-widest text-slate-400 uppercase">Installed Modules</div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {ins.map(id => {
+          if (REG[id]?.d !== 1) return null;
+          const Ic = REG[id].ic;
+          return (
+          <div key={`set-${id}`} className="bg-white/80 backdrop-blur rounded-2xl p-5 flex justify-between items-center shadow-sm border border-white">
+            <span className="font-semibold text-slate-800 text-base flex items-center gap-4"><div className={`w-10 h-10 rounded-xl flex items-center justify-center bg-gradient-to-br ${REG[id].c} ${REG[id].t} shadow-inner drop-shadow-sm`}><Ic size={20}/></div>{REG[id].n}</span>
+            <button onClick={(e)=>{playSound('click',e); un(id)}} className="px-5 py-2.5 bg-rose-50 text-rose-600 rounded-xl text-xs font-bold hover:bg-rose-100 active:scale-95 transition-transform border border-rose-100">Delete</button>
+          </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
 
-export default function LithiumOS() {
+function StoreApp({ ins, setIns }) {
+  return (
+    <div className="w-full h-full bg-slate-50/80 backdrop-blur-xl text-slate-800 flex flex-col p-8">
+      <h2 className="text-4xl font-bold mb-10 tracking-tight flex items-center gap-4"><Store className="text-purple-500" size={36}/> Market</h2>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 flex-1 overflow-y-auto px-1 pb-10 scrollbar-hide">
+        {Object.keys(REG).filter(k => REG[k].d === 1 && !ins.includes(k)).map(id => {
+          const Ic = REG[id].ic;
+          return (
+          <motion.div initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} key={`store-${id}`} className="bg-white/90 backdrop-blur p-8 rounded-[2rem] border border-white shadow-[0_10px_30px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center text-center gap-4 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all">
+            <div className={`w-20 h-20 rounded-[1.8rem] flex items-center justify-center bg-gradient-to-br ${REG[id].c} ${REG[id].t} shadow-[inset_0_2px_10px_rgba(255,255,255,0.3)] shadow-md`}><Ic size={36}/></div>
+            <span className="font-bold text-slate-800 text-lg">{REG[id].n}</span>
+            <button onClick={(e)=>{playSound('click',e); setIns([...ins, id]);}} className="mt-4 text-xs font-bold tracking-widest bg-slate-900 text-white px-8 py-3 rounded-full hover:bg-purple-600 transition-colors active:scale-95 shadow-xl hover:shadow-purple-500/30">GET CORE</button>
+          </motion.div>
+          );
+        })}
+        {Object.keys(REG).filter(k => REG[k].d === 1 && !ins.includes(k)).length === 0 && <div className="col-span-full h-full flex flex-col items-center justify-center text-slate-500 font-medium text-lg"><Zap size={56} className="mb-6 opacity-30"/>All modules acquired!</div>}
+      </div>
+    </div>
+  );
+}
+
+function DefaultApp({ app }) {
+  const Ic = app.ic;
+  return <div className="w-full h-full bg-white/50 backdrop-blur-xl flex flex-col items-center justify-center text-slate-500 p-8 text-center text-lg"><Ic size={80} className="mb-8 text-slate-300 drop-shadow-sm" /><p className="font-bold text-2xl text-slate-800">Module Initialized</p><p className="mt-4 opacity-70 max-w-sm leading-relaxed">{app.n} relies on experimental dependencies not available in the current kernel preview.</p></div>;
+}
+
+// --- MAIN OS SYSTEM ---
+export default function LithiumOS({ previewMode = false }) {
+  const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
   const [locked, setLocked] = useState(false);
   const [wins, setWins] = useState([]);
@@ -294,171 +233,244 @@ export default function LithiumOS() {
   const [startOpen, setStartOpen] = useState(false);
   const [q, setQ] = useState('');
   
-  // Custom context menu state
-  const [ctxMenu, setCtxMenu] = useState({show:false, x:0, y:0, type:null, id:null});
+  // Mobile check
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+  const [activeMobileApp, setActiveMobileApp] = useState(null);
+
+  const containerRef = useRef(null);
+  const [wallpaperIdx] = useState(Math.floor(Math.random() * 3));
+  const wallpapers = [
+     'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
+     'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2564&auto=format&fit=crop',
+     'https://images.unsplash.com/photo-1614850715649-1d0106293cb1?q=80&w=2564&auto=format&fit=crop'
+  ];
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   useEffect(() => { const t = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(t); }, []);
   
   const focusApp = useCallback((id) => setWins(ws => ws.map(w => w.id === id ? { ...w, z: Date.now(), min: false } : w).sort((a,b)=>a.z-b.z)), []);
   const launchApp = useCallback((id, e) => {
-    if(e) playSound('click', e);
+    if(e) playSound('open', e);
+    
+    if (isMobile) {
+      setActiveMobileApp(id);
+      setStartOpen(false);
+      return;
+    }
+
     setWins(ws => {
       const ex = ws.find(w => w.id === id);
-      if (ex) return ws.map(w => w.id === id ? { ...w, z: Date.now(), min: false } : w).sort((a,b)=>a.z-b.z);
-      return [...ws, { id, ic: REG[id].ic, z: Date.now(), min: false, max: false, x: 100 + ws.length*30, y: 100 + ws.length*30, w: Math.min(window.innerWidth-100, 800), h: Math.min(window.innerHeight-100, 550) }];
+      if (ex) return ws.map(w => w.id === id ? { ...w, z: Date.now(), min: false, max: false } : w).sort((a,b)=>a.z-b.z);
+      // Ensure we don't open too large
+      const wWidth = Math.min(800, window.innerWidth - 80);
+      const wHeight = Math.min(600, window.innerHeight - 150);
+      const startX = Math.max(0, (window.innerWidth - wWidth) / 2 + ws.length * 20);
+      const startY = Math.max(30, (window.innerHeight - wHeight) / 2 + ws.length * 20 - 40);
+
+      return [...ws, { id, ic: REG[id].ic, z: Date.now(), min: false, max: false, x: startX, y: startY, w: wWidth, h: wHeight }];
     });
-    setStartOpen(false); setCtxMenu({show:false});
-  }, []);
+    setStartOpen(false);
+  }, [isMobile]);
   
   const closeApp = (id) => setWins(ws => ws.filter(w => w.id !== id));
   const minApp = (id) => setWins(ws => ws.map(w => w.id === id ? { ...w, min: true } : w));
-  const maxApp = (id) => setWins(ws => ws.map(w => w.id === id ? { ...w, max: !w.max } : w));
+  const maxApp = (id) => setWins(ws => ws.map(w => w.id === id ? { ...w, max: !w.max, x: w.max ? w.x : 0, y: w.max ? w.y : 28 } : w));
 
-  const handleRightClick = (e, type, id) => {
-    e.preventDefault(); e.stopPropagation();
-    setCtxMenu({ show: true, x: e.clientX, y: Math.min(e.clientY, window.innerHeight - 150), type, id });
-  };
-  
-  useEffect(()=>{
-     const closeCtx = () => setCtxMenu({show:false});
-     window.addEventListener('click', closeCtx);
-     return () => window.removeEventListener('click', closeCtx);
-  }, []);
-
-  const renderApp = (id) => {
+  const renderAppObj = (id) => {
     switch(id) {
        case 'terminal': return <TerminalApp />;
        case 'calc': return <CalculatorApp />;
-       case 'clock': return <ClockApp />;
-       case 'store': return <StoreApp ins={apps} setIns={setApps} shake={()=>{}} />;
-       case 'settings': return <SettingsApp ins={apps} un={(i) => setApps(apps.filter(x=>x!==i))} lock={()=>{setLocked(true);setWins([]);}} />;
+       case 'store': return <StoreApp ins={apps} setIns={setApps} />;
+       case 'settings': return <SettingsApp ins={apps} un={(i) => setApps(apps.filter(x=>x!==i))} lock={()=>{setLocked(true);setWins([]); setActiveMobileApp(null)}} />;
        case 'notes': return <NotesApp />;
-       case 'canvas': return <CanvasApp />;
-       case 'media': return <MediaApp />;
-       case 'vault': return <VaultApp />;
-       default: return <DynamicApp app={REG[id]} />;
+       default: return <DefaultApp app={REG[id]} />;
     }
   };
 
+  const handleLogout = () => {
+     localStorage.removeItem('LITHIUM_USER');
+     navigate('/login');
+  };
+
+  // ------------------- MOBILE RENDER -------------------
+  if (isMobile && !previewMode) {
+    return (
+       <div className="absolute inset-0 bg-slate-900 overflow-hidden font-sans text-slate-800 select-none flex flex-col pt-10 pb-8" style={{ backgroundImage: `url(${wallpapers[wallpaperIdx]})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+         <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-xl mix-blend-overlay" />
+         
+         {/* STATUS BAR */}
+         <div className="absolute top-0 left-0 right-0 h-10 flex items-center justify-between px-6 z-50 text-white text-xs font-semibold drop-shadow-md">
+            <span>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+            <div className="flex gap-2"><Wifi size={14}/><Battery size={14} /></div>
+         </div>
+
+         <AnimatePresence mode="wait">
+           {activeMobileApp ? (
+             <motion.div 
+               key="app"
+               initial={{ opacity: 0, scale: 0.95, y: 20 }}
+               animate={{ opacity: 1, scale: 1, y: 0 }}
+               exit={{ opacity: 0, scale: 0.95, y: 20 }}
+               transition={{ type: "spring", bounce: 0, duration: 0.4 }}
+               className="absolute inset-0 z-40 bg-white flex flex-col"
+             >
+                <div className="h-14 bg-white/90 backdrop-blur border-b border-slate-200 flex items-center justify-between px-4 z-50 shrink-0 shadow-sm">
+                   <button onClick={() => setActiveMobileApp(null)} className="flex items-center gap-1 text-blue-500 font-semibold"><ChevronLeft size={20}/> Back</button>
+                   <span className="font-bold text-slate-800 text-sm tracking-wide">{REG[activeMobileApp].n}</span>
+                   <div className="w-16"/>
+                </div>
+                <div className="flex-1 overflow-hidden bg-slate-50 relative">
+                   {renderAppObj(activeMobileApp)}
+                </div>
+             </motion.div>
+           ) : (
+             <motion.div key="home" className="flex-1 relative z-10 flex flex-col p-6 overflow-y-auto scrollbar-hide pt-10">
+               <h2 className="text-white text-3xl font-bold mb-8 drop-shadow-md">Lithium Center</h2>
+               <div className="grid grid-cols-4 gap-y-8 gap-x-4">
+                  {apps.map(id => {
+                     const a = REG[id]; const Ic = a.ic;
+                     return (
+                        <div key={id} className="flex flex-col items-center gap-2" onClick={(e) => launchApp(id, e)}>
+                           <div className={`w-[4.5rem] h-[4.5rem] rounded-3xl flex items-center justify-center bg-gradient-to-br ${a.c} ${a.t} shadow-lg shadow-black/20 active:scale-95 transition-transform border border-white/20`}><Ic size={32}/></div>
+                           <span className="text-[11px] font-semibold text-white text-center drop-shadow-md tracking-wide">{a.n}</span>
+                        </div>
+                     )
+                  })}
+               </div>
+             </motion.div>
+           )}
+         </AnimatePresence>
+       </div>
+    );
+  }
+
+  // ------------------- DESKTOP RENDER -------------------
   return (
-    <div className="absolute inset-0 bg-[#f8f9fb] overflow-hidden font-sans text-slate-800 flex flex-col text-sm select-none" onContextMenu={(e)=>handleRightClick(e, 'desktop', null)}>
+    <div className="absolute inset-0 bg-[#f8f9fb] overflow-hidden font-sans text-slate-800 flex flex-col text-sm select-none" ref={containerRef}>
       
       {/* MAC-STYLE MENUBAR */}
-      <div className="h-7 bg-white/60 backdrop-blur-2xl border-b border-black/5 flex justify-between px-4 z-[200] text-slate-700 shadow-sm font-medium">
-         <div className="flex gap-4 h-full items-center">
-            <button className="flex items-center gap-2 hover:bg-white/50 px-2 rounded h-full transition-colors font-bold"><div className="w-3.5 h-3.5 bg-gradient-to-br from-slate-200 to-white shadow-sm border border-slate-300 rounded-sm flex items-center justify-center"><div className="w-1.5 h-1.5 bg-rose-400 rounded-sm"/></div>Lithium</button>
-            <button className="hover:bg-white/50 px-2 h-full font-bold text-slate-900 transition-colors hidden sm:block">{wins.length > 0 && !wins[wins.length-1].min ? REG[wins[wins.length-1].id].n : 'Finder'}</button>
-            <button className="hover:bg-white/50 px-2 h-full opacity-80 hidden md:block">File</button>
-            <button className="hover:bg-white/50 px-2 h-full opacity-80 hidden md:block">Edit</button>
-            <button className="hover:bg-white/50 px-2 h-full opacity-80 hidden md:block">Window</button>
-            <button className="hover:bg-white/50 px-2 h-full opacity-80 hidden md:block" onClick={(e) => {e.stopPropagation(); setLocked(true); setWins([])}}>Sleep</button>
+      <div className="h-8 bg-white/40 backdrop-blur-2xl border-b border-white/40 flex justify-between px-5 z-[200] text-slate-700 shadow-sm font-medium items-center">
+         <div className="flex gap-5 h-full items-center text-[13px] font-semibold">
+            <button className="flex items-center gap-2 hover:bg-white/60 px-2 rounded h-full transition-colors drop-shadow-sm"><div className="w-3.5 h-3.5 bg-gradient-to-br from-cyan-400 to-blue-500 shadow-sm rounded-sm flex items-center justify-center"><div className="w-1.5 h-1.5 bg-white rounded-sm opacity-50"/></div></button>
+            <button className="hover:bg-white/60 px-2 h-full text-slate-900 transition-colors drop-shadow-sm">{wins.length > 0 && !wins[wins.length-1].min ? REG[wins[wins.length-1].id].n : 'Finder'}</button>
+            <button className="hover:bg-white/60 px-2 h-full opacity-80">File</button>
+            <button className="hover:bg-white/60 px-2 h-full opacity-80">Edit</button>
+            <button className="hover:bg-white/60 px-2 h-full opacity-80">View</button>
+            <button className="hover:bg-white/60 px-2 h-full opacity-80" onClick={(e) => {e.stopPropagation(); setLocked(true); setWins([])}}>Sleep</button>
          </div>
-         <div className="flex gap-4 h-full items-center px-2">
-            <div className="flex gap-3 text-slate-500"><Wifi size={14}/><Battery size={15} /></div>
-            <span className="font-semibold tracking-wide">{time.toLocaleString([], { weekday: 'short', month:'short', day: 'numeric', hour: 'numeric', minute: '2-digit' })}</span>
+         <div className="flex gap-5 h-full items-center px-2">
+            {!previewMode && <button onClick={handleLogout} className="hover:bg-white/60 px-2 h-full flex items-center gap-2 opacity-80"><LogOut size={14}/> Quit</button>}
+            <div className="flex gap-3 text-slate-600"><Wifi size={14}/><Battery size={15} /></div>
+            <span className="font-bold tracking-wide drop-shadow-sm">{time.toLocaleString([], { weekday: 'short', month:'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
          </div>
       </div>
 
-      <div className="flex-1 relative overflow-hidden bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop)' }}>
-        <div className="absolute inset-0 bg-white/30 backdrop-blur-[50px] mix-blend-overlay" />
-        <div className="absolute inset-0 bg-gradient-to-tr from-slate-100/40 to-white/10 pointer-events-none" />
+      <div className="flex-1 relative overflow-hidden bg-cover bg-center" style={{ backgroundImage: `url(${wallpapers[wallpaperIdx]})` }}>
+        <div className="absolute inset-0 bg-white/10 backdrop-blur-[20px] mix-blend-overlay" />
+        <div className="absolute inset-0 bg-gradient-to-tr from-slate-900/40 to-white/10 pointer-events-none" />
 
         {/* DESKTOP ICONS */}
-        <div className="absolute top-6 right-6 flex flex-col gap-6 z-0 items-end">
-           {apps.slice(0, 5).map(id => {
+        <div className="absolute top-8 right-8 flex flex-col gap-8 z-0 items-end">
+           {apps.slice(0, 4).map(id => {
              const a = REG[id]; if (!a) return null; const Ic = a.ic;
              return (
-               <div key={`desktop-${id}`} className="flex flex-col items-center gap-1.5 cursor-pointer w-20 group" onDoubleClick={(e)=>launchApp(id, e)} onContextMenu={(e)=>handleRightClick(e, 'app', id)}>
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg transition-transform group-active:scale-95 bg-white/80 backdrop-blur-xl border border-white`}><Ic size={28} className={a.c.split(' ')[1]} /></div>
-                  <span className="text-[11px] font-bold text-slate-800 text-center drop-shadow-md bg-white/60 px-2 py-0.5 rounded backdrop-blur-md">{a.n}</span>
-               </div>
+               <motion.div initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} key={`desktop-${id}`} className="flex flex-col items-center gap-2 cursor-pointer w-24 group" onDoubleClick={(e)=>launchApp(id, e)}>
+                  <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center shadow-[0_10px_20px_rgba(0,0,0,0.1)] group-hover:shadow-[0_15px_30px_rgba(0,0,0,0.2)] transition-all group-active:scale-95 bg-white/40 backdrop-blur-2xl border border-white/60 group-hover:bg-white/60`}><Ic size={32} className="text-slate-800 opacity-80" /></div>
+                  <span className="text-[12px] font-bold text-white text-center drop-shadow-md bg-black/20 px-3 py-1 rounded-full backdrop-blur-md">{a.n}</span>
+               </motion.div>
              )
            })}
         </div>
         
         {/* WINDOWS */}
-        {!locked && wins.map(w => (
-          <Window key={w.id} w={w} focus={focusApp} close={closeApp} min={minApp} max={maxApp}>
-            {renderApp(w.id)}
-          </Window>
-        ))}
+        <AnimatePresence>
+           {!locked && wins.map(w => (
+             <Window key={w.id} w={w} focus={focusApp} close={closeApp} min={minApp} max={maxApp} constraintsRef={containerRef}>
+               {renderAppObj(w.id)}
+             </Window>
+           ))}
+        </AnimatePresence>
 
         {/* FROSTED DOCK */}
         <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[150] flex items-end">
-           <div className="bg-white/40 backdrop-blur-3xl border border-white/60 rounded-[2rem] p-3 flex items-center gap-3 shadow-[0_30px_60px_rgba(0,0,0,0.15)] ring-1 ring-black/5">
-             <button onClick={(e)=>{playSound('click', e); setStartOpen(!startOpen);}} className="w-14 h-14 rounded-2xl bg-white shadow-xl border border-slate-100 flex items-center justify-center cursor-pointer hover:-translate-y-3 hover:scale-105 hover:bg-slate-50 transition-all font-bold">
-                <Search size={24} className="text-slate-700" />
-             </button>
-             <div className="w-px h-10 bg-slate-300/50 mx-1 rounded-full"/>
-             {apps.slice(0, 10).map(id => {
-               const a = REG[id]; const isOpen = wins.find(w=>w.id===id); const Ic = a.ic;
+           <div className="bg-white/30 backdrop-blur-3xl border border-white/50 rounded-[2.5rem] p-3 flex items-center gap-3 shadow-[0_40px_80px_rgba(0,0,0,0.2)] ring-1 ring-black/5">
+             <motion.button whileHover={{ y: -8, scale: 1.1 }} whileTap={{ scale: 0.95 }} onClick={(e)=>{playSound('click', e); setStartOpen(!startOpen);}} className="w-[4.5rem] h-[4.5rem] rounded-3xl bg-white shadow-xl border border-white flex items-center justify-center cursor-pointer font-bold relative group">
+                <Search size={28} className="text-slate-800" />
+                <div className="absolute -top-12 opacity-0 group-hover:opacity-100 bg-slate-900 text-white text-xs px-3 py-1 rounded-full font-semibold transition-opacity pointer-events-none drop-shadow-md whitespace-nowrap">Search & Launch</div>
+             </motion.button>
+             <div className="w-[1.5px] h-12 bg-white/40 mx-2 rounded-full"/>
+             {apps.slice(0, 8).map(id => {
+               const a = REG[id]; const isOpen = wins.find(w=>w.id===id && !w.min); const Ic = a.ic;
                return (
-                 <button key={`dock-${id}`} onClick={(e)=>{launchApp(id,e); if(isOpen&&isOpen.min)focusApp(id)}} className="relative w-14 h-14 rounded-2xl bg-white/90 backdrop-blur shadow-md border border-white flex items-center justify-center cursor-pointer hover:-translate-y-3 hover:scale-105 hover:bg-white hover:shadow-xl transition-all group">
-                   <Ic size={26} className={a.c.split(' ')[1]} />
-                   {isOpen && <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-slate-800 shadow-sm"/>}
-                 </button>
+                 <motion.button whileHover={{ y: -8, scale: 1.1 }} whileTap={{ scale: 0.95 }} key={`dock-${id}`} onClick={(e)=>{launchApp(id,e); if(isOpen&&isOpen.min)focusApp(id)}} className="relative w-[4.5rem] h-[4.5rem] rounded-3xl bg-transparent flex items-center justify-center cursor-pointer group">
+                   <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${a.c} opacity-90 border border-white/40 shadow-inner group-hover:opacity-100 transition-opacity`} />
+                   <Ic size={32} className={`relative z-10 ${a.t} drop-shadow-md`} />
+                   {isOpen && <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 w-1.5 h-1.5 rounded-full bg-white shadow-[0_0_5px_rgba(255,255,255,0.8)]"/>}
+                   <div className="absolute -top-12 opacity-0 group-hover:opacity-100 bg-slate-900 text-white text-xs px-3 py-1 rounded-full font-semibold transition-opacity pointer-events-none drop-shadow-md whitespace-nowrap">{a.n}</div>
+                 </motion.button>
                )
              })}
            </div>
         </div>
 
-        {/* CUSTOM RIGHT-CLICK OVERLAY MENU */}
-        {ctxMenu.show && (
-           <div className="fixed z-[300] bg-white/80 backdrop-blur-3xl border border-white/60 rounded-xl shadow-[0_20px_40px_rgba(0,0,0,0.2)] py-1.5 w-48 text-sm text-slate-700 overflow-hidden font-medium" style={{ left: ctxMenu.x, top: ctxMenu.y }}>
-              {ctxMenu.type === 'desktop' && <>
-                 <div className="px-4 py-1.5 hover:bg-rose-500 hover:text-white cursor-pointer transition-colors" onClick={()=>setWins([])}>Close All Windows</div>
-                 <div className="px-4 py-1.5 hover:bg-rose-500 hover:text-white cursor-pointer transition-colors" onClick={()=>setLocked(true)}>Sleep System</div>
-                 <div className="my-1 border-t border-slate-200/60" />
-                 <div className="px-4 py-1.5 hover:bg-blue-500 hover:text-white cursor-pointer transition-colors">Change Workspace</div>
-              </>}
-              {ctxMenu.type === 'app' && <>
-                 <div className="px-4 py-1.5 hover:bg-emerald-500 hover:text-white cursor-pointer transition-colors font-bold" onClick={()=>launchApp(ctxMenu.id, null)}>Open Module</div>
-                 <div className="px-4 py-1.5 hover:bg-blue-500 hover:text-white cursor-pointer transition-colors text-slate-500" onClick={(e)=>e.stopPropagation()}>View Details</div>
-                 <div className="my-1 border-t border-slate-200/60" />
-                 <div className="px-4 py-1.5 hover:bg-rose-500 hover:text-white cursor-pointer transition-colors text-rose-600" onClick={()=>setApps(apps.filter(x=>x!==ctxMenu.id))}>Uninstall App</div>
-              </>}
-           </div>
-        )}
-
         {/* LAUNCHPAD OVERYLAY */}
-        {startOpen && !locked && (
-           <div className="absolute inset-0 bg-white/70 backdrop-blur-[60px] z-[160] flex flex-col items-center justify-center p-12 transition-all duration-300">
-              <div className="w-full max-w-2xl mb-20 relative flex justify-center">
-                 <input autoFocus value={q} onChange={e=>setQ(e.target.value)} type="text" className="w-[90%] bg-white/60 backdrop-blur-xl border border-white/80 outline-none text-slate-800 text-3xl font-medium py-6 px-16 rounded-[2rem] text-center placeholder-slate-400 shadow-[0_20px_50px_rgba(0,0,0,0.05)] focus:bg-white transition-all ring-1 ring-slate-200/50" placeholder="Search Station..." />
-                 <Search className="absolute left-[8%] top-1/2 -translate-y-1/2 text-slate-400" size={28}/>
-              </div>
-              <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-y-12 gap-x-8 max-w-5xl w-full">
-                 {apps.filter(x => REG[x].n.toLowerCase().includes(q.toLowerCase())).map((id) => {
-                   const app = REG[id]; if(!app) return null; const Ic = app.ic;
-                   return (
-                     <div key={`launch-${id}`} className="cursor-pointer group flex flex-col items-center gap-3" onClick={(e) => launchApp(id, e)}>
-                       <div className={`w-24 h-24 flex items-center justify-center shadow-xl rounded-[2rem] transition-transform group-hover:scale-110 active:scale-95 bg-white border border-slate-100 hover:shadow-2xl`}><Ic size={44} className={app.c.split(' ')[1]} /></div>
-                       <span className="text-sm font-bold text-slate-700 text-center tracking-wide">{app.n}</span>
-                     </div>
-                   );
-                 })}
-              </div>
-              <button className="absolute top-12 left-12 w-14 h-14 rounded-full bg-white/50 flex items-center justify-center hover:bg-white shadow-sm border border-slate-200 transition-colors" onClick={()=>setStartOpen(false)}><Lock size={20} className="text-slate-400"/></button>
-           </div>
-        )}
+        <AnimatePresence>
+           {startOpen && !locked && (
+              <motion.div 
+                 initial={{ opacity: 0, scale: 1.05 }}
+                 animate={{ opacity: 1, scale: 1 }}
+                 exit={{ opacity: 0, scale: 1.05 }}
+                 transition={{ duration: 0.3, ease: 'easeOut' }}
+                 className="absolute inset-0 bg-slate-900/60 backdrop-blur-[80px] z-[160] flex flex-col items-center justify-center p-12"
+              >
+                 <div className="w-full max-w-3xl mb-20 relative flex justify-center">
+                    <input autoFocus value={q} onChange={e=>setQ(e.target.value)} type="text" className="w-[90%] bg-white/10 backdrop-blur-3xl border border-white/20 outline-none text-white text-3xl font-medium py-6 px-16 rounded-[2.5rem] text-center shadow-[0_30px_60px_rgba(0,0,0,0.2)] focus:bg-white/20 transition-all focus:border-white/40 placeholder-white/30" placeholder="Search Kernel..." spellCheck="false" />
+                    <Search className="absolute left-[8%] top-1/2 -translate-y-1/2 text-white/50" size={32}/>
+                 </div>
+                 <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-y-12 gap-x-8 max-w-5xl w-full">
+                    {apps.filter(x => REG[x].n.toLowerCase().includes(q.toLowerCase())).map((id) => {
+                      const app = REG[id]; if(!app) return null; const Ic = app.ic;
+                      return (
+                        <div key={`launch-${id}`} className="cursor-pointer group flex flex-col items-center gap-4" onClick={(e) => launchApp(id, e)}>
+                          <div className={`w-24 h-24 flex items-center justify-center shadow-xl rounded-[2rem] transition-transform group-hover:scale-110 active:scale-95 bg-gradient-to-br ${app.c} border border-white/20 hover:shadow-2xl`}><Ic size={44} className={app.t} /></div>
+                          <span className="text-sm font-bold text-white text-center tracking-wide drop-shadow-md">{app.n}</span>
+                        </div>
+                      );
+                    })}
+                 </div>
+                 <button className="absolute top-12 left-12 w-16 h-16 rounded-full bg-white/10 flex items-center justify-center hover:bg-white/20 shadow-sm border border-white/20 transition-all group" onClick={()=>setStartOpen(false)}><X size={28} className="text-white group-hover:rotate-90 transition-transform"/></button>
+              </motion.div>
+           )}
+        </AnimatePresence>
 
         {/* LOCK SCREEN */}
-        {locked && (
-          <div className="absolute inset-0 z-[250] flex flex-col items-center justify-center bg-cover bg-center" style={{ backgroundImage: 'url(https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop)' }}>
-            <div className="absolute inset-0 bg-slate-900/10 backdrop-blur-3xl mix-blend-overlay" />
-            <div className="z-10 flex flex-col items-center relative gap-8 py-20">
-              <div className="text-center bg-white/10 p-12 rounded-[4rem] backdrop-blur-xl border border-white/20 shadow-2xl">
-                 <h1 className="text-[10rem] leading-[0.8] font-semibold tracking-tighter text-slate-800 drop-shadow-[0_10px_20px_rgba(0,0,0,0.1)]">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</h1>
-                 <p className="text-3xl font-bold text-slate-600 tracking-wider mt-6">{time.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}</p>
-              </div>
-              <div className="group w-20 h-20 rounded-full bg-white flex items-center justify-center shadow-[0_20px_40px_rgba(0,0,0,0.2)] cursor-pointer hover:scale-110 active:scale-95 transition-all mt-10 border-4 border-white/50 backdrop-blur-xl relative overflow-hidden" onClick={(e) => { playSound('unlock', e); setLocked(false); }}>
-                 <div className="absolute inset-0 bg-gradient-to-tr from-rose-100 to-blue-100 opacity-0 group-hover:opacity-100 transition-opacity" />
-                 <Lock size={32} className="text-slate-700 relative z-10" />
-              </div>
-              <p className="text-sm font-bold mt-4 text-slate-600 tracking-[0.2em] uppercase origin-bottom">Fingerprint Required</p>
-            </div>
-          </div>
-        )}
+        <AnimatePresence>
+           {locked && (
+             <motion.div 
+               initial={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+               animate={{ opacity: 1, backdropFilter: 'blur(40px)' }}
+               exit={{ opacity: 0, backdropFilter: 'blur(0px)' }}
+               transition={{ duration: 0.5 }}
+               className="absolute inset-0 z-[250] flex flex-col items-center justify-center bg-slate-900/60"
+             >
+               <div className="z-10 flex flex-col items-center relative gap-8 py-20">
+                 <div className="text-center">
+                    <h1 className="text-[9rem] leading-[0.8] font-bold tracking-tighter text-white drop-shadow-[0_10px_30px_rgba(0,0,0,0.5)]">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</h1>
+                    <p className="text-3xl font-bold text-slate-300 tracking-wider mt-6 drop-shadow-md">{time.toLocaleDateString([], { weekday: 'long', month: 'long', day: 'numeric' })}</p>
+                 </div>
+                 <motion.div whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }} className="w-24 h-24 rounded-full bg-white/20 flex items-center justify-center shadow-[0_20px_40px_rgba(0,0,0,0.3)] cursor-pointer transition-all mt-10 border border-white/40 backdrop-blur-xl group" onClick={(e) => { playSound('open', e); setLocked(false); }}>
+                    <Lock size={36} className="text-white group-hover:text-cyan-300 transition-colors" />
+                 </motion.div>
+                 <p className="text-sm font-bold mt-4 text-white/60 tracking-[0.2em] uppercase origin-bottom">Double Tap to Unlock</p>
+               </div>
+             </motion.div>
+           )}
+        </AnimatePresence>
       </div>
     </div>
   );
