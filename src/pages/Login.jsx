@@ -44,9 +44,9 @@ export default function Login() {
          // Save encrypted vault to GitHub repo
          const syncResult = await saveVault(vault);
          
-         if (syncResult === 'local') {
-            setStatus('success');
-            setMsg('Identity forged (Local Only - Sync Failed).');
+         if (syncResult && syncResult.status === 'error') {
+            setStatus('error');
+            setMsg(`Sync Failed: ${syncResult.message}`);
          } else {
             setStatus('success');
             setMsg('Identity forged. Switching to login...');

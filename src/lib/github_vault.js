@@ -106,7 +106,7 @@ export async function saveVault(content) {
     if (!res.ok) throw new Error(data.message || "Failed to update vault.");
     return data.content.sha;
   } catch (err) {
-    console.warn("GitHub write failed, saved to local cache only:", err.message);
-    return 'local';
+    console.error("GitHub sync failed:", err);
+    return { status: 'error', message: err.message };
   }
 }
