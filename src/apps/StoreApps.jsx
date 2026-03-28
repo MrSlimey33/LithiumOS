@@ -12,26 +12,27 @@ export function StoreApp({ ins, setIns, REG, playSound, openDevStudio }) {
       .then(res => res.json())
       .then(data => {
         const parsedApps = [];
-        for (const issue of data) {
-           try {
-             const body = issue.body || '';
-             const jsonMatch = body.match(/```json\n([\s\S]*?)\n```/);
-             if (jsonMatch && jsonMatch[1]) {
-                const appData = JSON.parse(jsonMatch[1]);
-                if (appData.name && appData.code) {
-                   parsedApps.push({
-                      id: `ext_${issue.id}`,
-                      title: appData.name,
-                      dev: appData.developer || issue.user.login,
-                      icon: appData.icon || 'Box',
-                      img: appData.color || 'from-slate-700 to-slate-900',
-                      desc: appData.description || 'No description provided.',
-                      code: appData.code
-                   });
-                }
-             }
-           } catch(e) {}
-        }
+         for (const issue of data) {
+            try {
+              const body = issue.body || '';
+              // More robust regex
+              const jsonMatch = body.match(/```json\s*([\s\S]*?)\s*```/);
+              if (jsonMatch && jsonMatch[1]) {
+                 const appData = JSON.parse(jsonMatch[1].trim());
+                 if (appData.name && appData.code) {
+                    parsedApps.push({
+                       id: `ext_${issue.id}`,
+                       title: appData.name,
+                       dev: appData.developer || issue.user.login,
+                       icon: appData.icon || 'Box',
+                       img: appData.color || 'from-slate-700 to-slate-900',
+                       desc: appData.description || 'No description provided.',
+                       code: appData.code
+                    });
+                 }
+              }
+            } catch(e) { console.error("StoreApp Parse Error:", e); }
+         }
         setExtApps(parsedApps);
         setLoading(false);
       })
@@ -97,14 +98,14 @@ export function StoreApp({ ins, setIns, REG, playSound, openDevStudio }) {
               </div>
            )}
            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-              {extApps.filter(a => !ins.includes(a.id)).map(a => {
-                 const IconCmp = LucideIcons[a.icon] || LucideIcons.Box;
-                 return (
-                 <div key={a.id} className="bg-white/80 p-6 rounded-[2rem] border border-white/50 shadow-sm flex flex-col items-center justify-center text-center gap-2 hover:-translate-y-1 hover:shadow-xl transition-all relative overflow-hidden group">
-                   <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                   <div className={`w-16 h-16 rounded-3xl bg-gradient-to-br ${a.img} shadow-inner mb-2 flex items-center justify-center border border-white/20`}>
-                      <IconCmp className="text-white drop-shadow-md" size={32} />
-                   </div>
+               {extApps.filter(a => !ins.includes(a.id)).map(a => {
+                  const IconComponent = LucideIcons[a.icon] || LucideIcons.Box || LucideIcons.Zap;
+                  return (
+                  <div key={a.id} className="bg-white/80 p-6 rounded-[2rem] border border-white/50 shadow-sm flex flex-col items-center justify-center text-center gap-2 hover:-translate-y-1 hover:shadow-xl transition-all relative overflow-hidden group">
+                    <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className={`w-16 h-16 rounded-3xl bg-gradient-to-br ${a.img} shadow-inner mb-2 flex items-center justify-center border border-white/20`}>
+                       {IconComponent && <IconComponent className="text-white drop-shadow-md" size={32} />}
+                    </div>
                    <h4 className="font-bold text-slate-800 tracking-tight truncate w-full px-2">{a.title}</h4>
                    <p className="text-[9px] font-bold tracking-widest uppercase text-slate-400">By {a.dev}</p>
                    <p className="text-xs text-slate-500 line-clamp-2 my-2">{a.desc}</p>

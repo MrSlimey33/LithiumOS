@@ -17,9 +17,10 @@ export default function Marketplace() {
         for (const issue of data) {
            try {
              const body = issue.body || '';
-             const jsonMatch = body.match(/```json\n([\s\S]*?)\n```/);
+             // More robust regex to handle spaces and different newlines
+             const jsonMatch = body.match(/```json\s*([\s\S]*?)\s*```/);
              if (jsonMatch && jsonMatch[1]) {
-                const appData = JSON.parse(jsonMatch[1]);
+                const appData = JSON.parse(jsonMatch[1].trim());
                 // Validate app
                 if (appData.name && appData.code) {
                    parsedApps.push({
@@ -34,7 +35,7 @@ export default function Marketplace() {
                    });
                 }
              }
-           } catch (e) { console.error("Failed to parse app issue:", issue.id); }
+           } catch (e) { console.error("Failed to parse app issue:", issue.id, e); }
         }
         setApps(parsedApps);
         setStatus(parsedApps.length > 0 ? 'success' : 'empty');
@@ -103,11 +104,13 @@ export default function Marketplace() {
           {status === 'success' && (
              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                 {apps.map((a) => {
-                   const IconCmp = LucideIcons[a.icon] || LucideIcons.Box;
+                   // Safety check for icons
+                   const IconComponent = LucideIcons[a.icon] || LucideIcons.Box || LucideIcons.Zap;
+                   
                    return (
                       <motion.div initial={{opacity:0, y:20}} whileInView={{opacity:1, y:0}} key={a.id} className="glass-dark rounded-[2.5rem] p-8 border border-white/10 hover:-translate-y-2 transition-all cursor-pointer flex flex-col items-center text-center group hover:shadow-[0_20px_40px_rgba(59,130,246,0.1)]" onClick={()=>setModal(a)}>
                          <div className={`w-24 h-24 rounded-[1.8rem] bg-gradient-to-br ${a.img} shadow-inner mb-6 flex items-center justify-center border border-white/20 group-hover:scale-105 transition-transform`}>
-                            <IconCmp className="text-white drop-shadow-md" size={36} />
+                            {IconComponent && <IconComponent className="text-white drop-shadow-md" size={36} />}
                          </div>
                          <h3 className="text-xl font-bold text-white mb-2">{a.title}</h3>
                          <p className="text-xs font-bold tracking-widest uppercase text-slate-500 mb-4">{a.dev}</p>
@@ -129,7 +132,10 @@ export default function Marketplace() {
                    
                    <div className="mb-6">
                       <div className={`w-32 h-32 mx-auto rounded-[2rem] bg-gradient-to-br ${modal.img} shadow-lg mb-6 flex items-center justify-center border border-white/20`}>
-                         {React.createElement(LucideIcons[modal.icon] || LucideIcons.Box, { size: 48, className: "text-white drop-shadow-md" })}
+                         {(() => {
+                            const ModalIcon = LucideIcons[modal.icon] || LucideIcons.Box || LucideIcons.Zap;
+                            return ModalIcon ? <ModalIcon size={48} className="text-white drop-shadow-md" /> : null;
+                         })()}
                       </div>
                       <h2 className="text-3xl font-bold text-white mb-2">{modal.title}</h2>
                       <p className="text-xs text-blue-400 font-bold mb-6 block uppercase tracking-widest">By: {modal.dev}</p>
