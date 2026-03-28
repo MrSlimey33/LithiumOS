@@ -7,12 +7,9 @@ const REPO = "LithiumOS";
 const PATH = "lithium_db.json";
 const BRANCH = "master";
 
-// 🔒 ULTIMATE STEALTH: Multi-part Base64 bypass to prevent automated revocation.
-// This allows a public-facing global vault without personal user tokens.
-const _s1 = "Z2l0aHViX3BhdF8xMUEyRDZIUUkwUjVmSG9zSGhO";
-const _s2 = "dnZsbl9IZVZYSTN5amI0TWIxcFNpVkl3RXZvbDhR";
-const _s3 = "eDhOYmViN1F2TXRROHhBVmtJN05ISkdUU3dIcUMz";
-const TOKEN = atob(_s1 + _s2 + _s3);
+// 🔓 GitHub Personal Access Token (PAT)
+// This token is used to sync the vault to the GitHub repository.
+const TOKEN = "github_pat_11A2D6HQI0R5fHosHhNvvln_HeVXI3yjb4Mb1pSiVIwEvol8Qx8Nbeb7QvMtQ8xAVkI7NHJGTSwHqC3";
 
 // Raw URL for public read — works without auth on public repos
 const RAW_URL = `https://raw.githubusercontent.com/${OWNER}/${REPO}/${BRANCH}/${PATH}`;
