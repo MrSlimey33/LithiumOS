@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Code2, Github, Terminal, Zap, ExternalLink } from 'lucide-react';
+import { Code2, Database, Terminal, Zap, ExternalLink } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Developers() {
@@ -63,7 +63,8 @@ export default function Developers() {
              </div>
 
              <div className="glass-dark p-8 rounded-[2rem] border border-white/10">
-                <div className="w-12 h-12 bg-purple-500/20 text-purple-400 rounded-2xl flex items-center justify-center mb-6"><Github size={24}/></div>
+                <div className="w-12 h-12 bg-purple-500/20 text-purple-400 rounded-2xl flex items-center justify-center mb-6"><Database size={24}/></div>
+
                 <h3 className="text-2xl font-bold text-white mb-4">The Free Database</h3>
                 <p className="text-slate-400 leading-relaxed">Our marketplace runs entirely on GitHub Issues. When you submit the form, it generates a perfect JSON payload inside a GitHub issue. The LithiumOS Marketplace fetches these open issues and instantly displays them globally. Free, uncostly, and deeply rooted in open source.</p>
              </div>
