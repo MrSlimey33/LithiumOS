@@ -11,7 +11,7 @@ export default function Station() {
   const [bootLogs, setBootLogs] = useState([]);
 
   useEffect(() => {
-    const user = localStorage.getItem('LITHIUM_USER');
+    const user = localStorage.getItem('LITHIUM_CLOUD_ID');
     if (!user) {
       navigate('/login');
     } else {
@@ -19,11 +19,13 @@ export default function Station() {
       // Simulate boot sequence
       const logs = [
          "Initializing Lithium Kernel v4.2.0...",
-         "Mounting VDisks...",
-         "Validating Client Side Storage...",
-         "Authenticating Node Identity: " + user,
+         "Solo-Dev Mode: ENABLED",
+         "Caffeine Levels: OPTIMAL",
+         "Bypassing Silicon Valley Gatekeepers...",
+         "Authenticating Founder: " + user,
          "Loading Spatial Window Manager...",
          "Establishing AeroEngine Compositor...",
+         "Checking for Homework: 0 files found (Good).",
          "Boot Sequence Complete. Yielding to UI Thread."
       ];
       

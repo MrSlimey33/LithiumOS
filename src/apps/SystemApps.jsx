@@ -14,8 +14,9 @@ export function TerminalApp({ playSound }) {
       if(cmd === 'clear') setLog([]); 
       else if(cmd === 'help') setLog([...log, res, "Commands: clear, help, date, whoami, neofetch, sudo make me a sandwich, do a barrel roll, matrix"]);
       else if(cmd === 'date') setLog([...log, res, new Date().toString()]);
-      else if(cmd === 'whoami') setLog([...log, res, "root@lithium"]);
-      else if(cmd === 'neofetch') setLog([...log, res, "   .o+`\n  `ooo/\n `+oooo:\n`+oooooo:\n-+oooooo+:\n Lithium OS 4.0\n Kernel: Web Native\n UI: AeroComposite"]);
+      else if(cmd === 'whoami') setLog([...log, res, "root@lithium: The visionary. The solo dev. The 17-year-old taking over the world."]);
+      else if(cmd === 'credits') setLog([...log, res, "LITHIUM OS v4.0\n----------------\nLead Developer: @MrSlimey33\nTeam Size: 1 (Me)\nCoffee Consumed: Excessive\nHomework Completed: 0%"]);
+      else if(cmd === 'neofetch') setLog([...log, res, "   .o+`             OS: Lithium Tech v4.2\n  `ooo/             Host: Local Node\n `+oooo:            Kernel: WebMirror v1.0\n`+oooooo:           Shell: LithiumShell\n-+oooooo+:          Uptime: Since last caffeine hit\n Lithium OS 4.0     Resolution: Infinite Scale\n Kernel: Web Native  CPU: 1x Visionary Brain\n UI: AeroComposite   Memory: 8MB (The rest is for the user)"]);
       else if(cmd === 'sudo make me a sandwich') setLog([...log, res, "What? Make it yourself."]);
       else if(cmd === 'matrix') {
          setLog([...log, res, "Wake up, Neo..."]);
