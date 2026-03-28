@@ -93,24 +93,27 @@ export function SettingsApp({ ins, un, lock, REG, playSound }) {
   const id = window.localStorage.getItem('LITHIUM_CLOUD_ID');
 
   const handleSync = async () => {
-     if(!id) return alert("No active Lithium ID found.");
+     if(!id) return alert("No active Lithium Email found.");
+     const pw = window.localStorage.getItem('LITHIUM_SECRET');
      setSyncing(true);
      try {
        const payload = {};
        for(let i=0; i<window.localStorage.length; i++){
           const k = window.localStorage.key(i);
-          if(k.startsWith('LITHIUM_') && k !== 'LITHIUM_CLOUD_ID') {
+          if(k.startsWith('LITHIUM_') && k !== 'LITHIUM_CLOUD_ID' && k !== 'LITHIUM_SECRET') {
              payload[k] = JSON.parse(window.localStorage.getItem(k));
           }
        }
-       await fetch(`https://jsonblob.com/api/jsonBlob/\${id}`, {
-         method: 'PUT',
-         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
-         body: JSON.stringify(payload)
+       const res = await fetch(`http://localhost:3001/api/sync`, {
+         method: 'POST',
+         headers: { 'Content-Type': 'application/json' },
+         body: JSON.stringify({ email: id, password: pw, payload })
        });
+       const data = await res.json();
+       if (!data.success) throw new Error(data.error);
        if(playSound) playSound('click', null);
      } catch(e) {
-       console.error(e); alert("Cloud Sync Failed.");
+       console.error(e); alert("Local Computer Sync Failed. Is the server running?");
      }
      setSyncing(false);
   };
