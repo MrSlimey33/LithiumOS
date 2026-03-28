@@ -89,6 +89,32 @@ export function CalculatorApp({ playSound }) {
 
 export function SettingsApp({ ins, un, lock, REG, playSound }) {
   const [rickRoll, setRickRoll] = useState(false);
+  const [syncing, setSyncing] = useState(false);
+  const id = window.localStorage.getItem('LITHIUM_CLOUD_ID');
+
+  const handleSync = async () => {
+     if(!id) return alert("No active Lithium ID found.");
+     setSyncing(true);
+     try {
+       const payload = {};
+       for(let i=0; i<window.localStorage.length; i++){
+          const k = window.localStorage.key(i);
+          if(k.startsWith('LITHIUM_') && k !== 'LITHIUM_CLOUD_ID') {
+             payload[k] = JSON.parse(window.localStorage.getItem(k));
+          }
+       }
+       await fetch(`https://jsonblob.com/api/jsonBlob/\${id}`, {
+         method: 'PUT',
+         headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+         body: JSON.stringify(payload)
+       });
+       if(playSound) playSound('click', null);
+     } catch(e) {
+       console.error(e); alert("Cloud Sync Failed.");
+     }
+     setSyncing(false);
+  };
+
   return (
     <div className="w-full h-full bg-slate-50/80 backdrop-blur-xl text-slate-800 p-8 overflow-y-auto font-sans relative">
       <h2 className="text-4xl font-bold mb-10 tracking-tight flex items-center gap-4 text-slate-900"><Settings className="text-slate-400" size={36}/> System Settings</h2>
@@ -99,6 +125,12 @@ export function SettingsApp({ ins, un, lock, REG, playSound }) {
          <div>
             <h3 className="font-bold text-3xl text-slate-900 mb-1">{rickRoll ? 'Never Gonna Give You Up' : 'Lithium Station'}</h3>
             <p className="text-slate-500 font-medium text-lg">Kernel OS 4.2.0 • AeroComposite Engine</p>
+         </div>
+         <div className="flex-1 flex justify-end">
+            <button onClick={handleSync} disabled={syncing || !id} className="bg-sky-50 text-sky-600 px-6 py-3 rounded-xl font-bold border border-sky-100 hover:bg-sky-100 transition-colors disabled:opacity-50 flex items-center gap-2 shadow-sm">
+               {syncing ? <div className="w-4 h-4 rounded-full border-2 border-sky-600 border-t-transparent animate-spin"/> : <Globe size={18}/>}
+               {id ? 'Push State to Cloud' : 'Lithium ID Required'}
+            </button>
          </div>
       </div>
 
@@ -111,6 +143,7 @@ export function SettingsApp({ ins, un, lock, REG, playSound }) {
          <div className="bg-white/70 backdrop-blur p-6 rounded-3xl border border-white shadow-sm flex flex-col gap-4">
             <h4 className="font-bold text-slate-800 text-lg flex items-center gap-2"><Globe size={18} className="text-blue-500"/> Network</h4>
             <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100"><span className="font-semibold text-slate-600 text-sm">LithiumNet</span><span className="text-xs font-bold text-emerald-500 bg-emerald-50 px-3 py-1 rounded-full">Connected</span></div>
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50 border border-slate-100"><span className="font-semibold text-slate-600 text-sm">Cloud ID</span><span className="text-xs font-mono font-bold text-sky-500 bg-sky-50 px-3 py-1 rounded-full truncate max-w-[120px]">{id || 'NONE'}</span></div>
          </div>
       </div>
 

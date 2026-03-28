@@ -49,6 +49,36 @@ export function WeatherApp() {
 export function BrowserApp() {
   const [url, setUrl] = useState("https://wikipedia.org");
   const [inputUrl, setInputUrl] = useState(url);
+  const [html, setHtml] = useState("<style>body{font-family:sans-serif;display:flex;align-items:center;justify-center;height:100vh;margin:0;background:#f8fafc;color:#64748b}</style><div>Connecting to CORS Proxy...</div>");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+     let active = true;
+     setLoading(true);
+     fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(url)}`)
+      .then(r => r.json())
+      .then(d => { 
+         if(active) {
+            let content = d.contents;
+            if (content) {
+               const base = new URL(url).origin;
+               content = content.replace(/href="\//g, `href="${base}/`).replace(/src="\//g, `src="${base}/`);
+            } else {
+               content = "<style>body{font-family:sans-serif;padding:2rem}</style><h1>Failed to load contents.</h1><p>The proxy could not retrieve the page.</p>";
+            }
+            setHtml(content); 
+            setLoading(false); 
+         }
+      })
+      .catch((e) => { 
+         if(active) { 
+            setHtml(`<style>body{font-family:sans-serif;padding:2rem}</style><h1>CORS Proxy Error</h1><p>${e.message}</p>`); 
+            setLoading(false); 
+         } 
+      });
+     return () => active = false;
+  }, [url]);
+
   const handleGo = (e) => {
     e.preventDefault();
     let dest = inputUrl.trim();
@@ -62,13 +92,14 @@ export function BrowserApp() {
             <button className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 font-bold">&lt;</button>
             <button className="w-8 h-8 rounded-full hover:bg-slate-100 flex items-center justify-center text-slate-500 font-bold">&gt;</button>
          </div>
-         <form onSubmit={handleGo} className="flex-1 relative">
-            <input type="text" value={inputUrl} onChange={e=>setInputUrl(e.target.value)} className="w-full bg-slate-100 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-100 rounded-full py-2 px-10 text-sm font-medium text-slate-700 outline-none transition-all" spellCheck="false" placeholder="Enter web address..." />
-            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+         <form onSubmit={handleGo} className="flex-1 relative flex items-center">
+            <input type="text" value={inputUrl} onChange={e=>setInputUrl(e.target.value)} disabled={loading} className="w-full bg-slate-100 border border-slate-200 focus:bg-white focus:ring-2 focus:ring-blue-100 rounded-full py-2 px-10 text-sm font-medium text-slate-700 outline-none transition-all placeholder-slate-400" spellCheck="false" placeholder="Enter web address..." />
+            <Search className="absolute left-3.5 text-slate-400" size={16} />
+            {loading && <div className="absolute right-4 w-4 h-4 border-2 border-slate-300 border-t-blue-500 rounded-full animate-spin"/>}
          </form>
       </div>
-      <div className="flex-1 bg-white relative">
-         <iframe src={url} className="w-full h-full border-none bg-white" sandbox="allow-scripts allow-same-origin" title="browser" />
+      <div className="flex-1 bg-white relative overflow-hidden">
+         <iframe srcDoc={html} className="w-full h-full border-none bg-white" sandbox="allow-scripts allow-same-origin allow-popups" title="browser" />
       </div>
     </div>
   );
