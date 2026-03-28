@@ -111,14 +111,15 @@ export function SettingsApp({ ins, un, lock, REG, playSound }) {
       // Encrypt before sending to your Drive
       const encryptedPayload = await encrypt(payload, pw);
 
+      // 🚀 CORS FIX: We send a 'Simple Request' by NOT specifying a JSON content-type header.
+      // This avoids the browser's failing OPTIONS pre-flight check.
       await fetch(gasUrl, {
         method: 'POST',
         mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'sync', email: id, payload: encryptedPayload })
       });
-
-      if (playSound) playSound('click', null);
+      
+      if(playSound) playSound('click', null);
       alert("Sync successful! Encrypted data pushed to your Founder Drive.");
     } catch (e) {
       console.error(e); alert("Cloud Sync Failed. Check console.");
