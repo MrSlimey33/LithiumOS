@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from 'framer-motion';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Station from './pages/Station';
+import Concepts from './pages/Concepts';
 
 function PageTransition({ children }) {
   const location = useLocation();
@@ -30,6 +31,7 @@ export default function App() {
       <Route path="/" element={<PageTransition><Home /></PageTransition>} />
       <Route path="/login" element={<PageTransition><Login /></PageTransition>} />
       <Route path="/station" element={<PageTransition><Station /></PageTransition>} />
+      <Route path="/concepts" element={<PageTransition><Concepts /></PageTransition>} />
     </Routes>
   );
 }
