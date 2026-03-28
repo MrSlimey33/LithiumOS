@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Settings, Cpu, Lock, Globe, FileText, Plus, Calculator, Terminal, Shield, Folder, Clock } from 'lucide-react';
+import { encrypt } from '../lib/crypto';
+import { getVault, saveVault } from '../lib/github_vault';
 
 export function TerminalApp({ playSound }) {
   const [log, setLog] = useState(["> Lithium OS Kernel loaded.", "> Run 'help' for commands.", "> Connecting to primary node... OK"]);
@@ -94,37 +96,33 @@ export function SettingsApp({ ins, un, lock, REG, playSound }) {
   const id = window.localStorage.getItem('LITHIUM_CLOUD_ID');
 
   const handleSync = async () => {
-    const gasUrl = "https://script.google.com/macros/s/AKfycbyaqY7PKLnrs8XXgBqXc6Sg1xa0U9WAC5_isP4F_s2skPcL19RSp4yQKGfZukgzJP0fTg/exec"; // Should match Login.jsx
-    if (!gasUrl) return alert("Contact Founder: GAS_URL not configured in SystemApps.jsx");
-    if (!id) return alert("No active Lithium Email found.");
-    const pw = window.localStorage.getItem('LITHIUM_SECRET');
-    setSyncing(true);
-    try {
-      const payload = {};
-      for (let i = 0; i < window.localStorage.length; i++) {
-        const k = window.localStorage.key(i);
-        if (k.startsWith('LITHIUM_') && k !== 'LITHIUM_CLOUD_ID' && k !== 'LITHIUM_SECRET') {
-          payload[k] = JSON.parse(window.localStorage.getItem(k));
-        }
-      }
-
-      // Raw JSON sync (Encryption disabled per user request)
-      const payloadToSend = payload;
-      
-      // 🚀 CORS FIX: We send a 'Simple Request' by NOT specifying a JSON content-type header.
-      // This avoids the browser's failing OPTIONS pre-flight check.
-      await fetch(gasUrl, {
-        method: 'POST',
-        mode: 'no-cors',
-        body: JSON.stringify({ action: 'sync', email: id, payload: payloadToSend })
-      });
-      
-      if(playSound) playSound('click', null);
-      alert("Sync successful! Data pushed to your Founder Drive.");
-    } catch (e) {
-      console.error(e); alert("Cloud Sync Failed. Check console.");
-    }
-    setSyncing(false);
+     if(!id) return alert("No active Lithium Email found.");
+     const pw = window.localStorage.getItem('LITHIUM_SECRET');
+     setSyncing(true);
+     try {
+       const payload = {};
+       for(let i=0; i<window.localStorage.length; i++){
+          const k = window.localStorage.key(i);
+          if(k.startsWith('LITHIUM_') && k !== 'LITHIUM_CLOUD_ID' && k !== 'LITHIUM_SECRET') {
+             payload[k] = JSON.parse(window.localStorage.getItem(k));
+          }
+       }
+       
+       const encryptedPayload = await encrypt(payload, pw);
+       const { data: vault, sha } = await getVault();
+       const userIdx = vault.findIndex(u => u.email.toLowerCase() === id.toLowerCase());
+       
+       if (userIdx === -1) throw new Error("User not found in the Lithium vault.");
+       vault[userIdx].payload = encryptedPayload;
+       
+       await saveVault(vault, sha);
+       
+       if(playSound) playSound('click', null);
+       alert("Sync successful! Encrypted profile saved to your GitHub Repository.");
+     } catch(e) {
+       console.error(e); alert("Cloud Sync Failed: " + e.message);
+     }
+     setSyncing(false);
   };
 
   return (

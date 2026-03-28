@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ArrowLeft, Cpu, Globe, Infinity as InfinityIcon } from 'lucide-react';
+import { ChevronLeft, Cpu, Globe, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function Technology() {
@@ -21,15 +21,15 @@ export default function Technology() {
             <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] group-hover:bg-cyan-500/20 transition-colors" />
             <Globe className="text-cyan-400 mb-8" size={48} />
             <h2 className="text-4xl font-bold tracking-tight text-white mb-4">Lithium Glass</h2>
-            <p className="text-slate-400 leading-relaxed text-lg font-light mb-8">An augmented reality spatial interface powered natively through a lightweight WebXR compositor. Interact with your web-node apps in true 3D space. No heavy headsets, just sleek frames.</p>
+            <p className="text-slate-400 leading-relaxed text-lg font-light mb-8">An augmented reality spatial interface powered natively through a lightweight WebXR compositor. Interact with your web-node apps in true 3D space.</p>
             <div className="text-xs font-bold tracking-widest text-cyan-500 uppercase px-4 py-2 border border-cyan-500/30 rounded-full inline-block">Estimated R&D 2028</div>
          </motion.div>
 
          <motion.div initial={{opacity:0, y:50}} whileInView={{opacity:1, y:0}} viewport={{once:true}} transition={{duration:0.8, delay:0.2}} className="bg-[#0a0f18] rounded-[3rem] p-10 border border-[#1e2330] relative overflow-hidden group">
             <div className="absolute bottom-0 right-0 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-[80px] group-hover:bg-fuchsia-500/20 transition-colors" />
-            <InfinityIcon className="text-fuchsia-400 mb-8" size={48} />
+            <Zap className="text-fuchsia-400 mb-8" size={48} />
             <h2 className="text-4xl font-bold tracking-tight text-white mb-4">Lithium Quant</h2>
-            <p className="text-slate-400 leading-relaxed text-lg font-light mb-8">Harnessing WebGPU compute shaders to run simulated quantum entanglement routines directly in the browser node. A massive leap for in-browser cryptographic security.</p>
+            <p className="text-slate-400 leading-relaxed text-lg font-light mb-8">Harnessing WebGPU compute shaders to run simulated quantum entanglement routines directly in the browser node.</p>
             <div className="text-xs font-bold tracking-widest text-fuchsia-500 uppercase px-4 py-2 border border-fuchsia-500/30 rounded-full inline-block">Estimated R&D 2029</div>
          </motion.div>
 
@@ -40,14 +40,14 @@ export default function Technology() {
             </div>
             <div className="flex-1">
                <h2 className="text-4xl font-bold tracking-tight text-white mb-4">Neural Link Beta</h2>
-               <p className="text-slate-400 leading-relaxed text-lg font-light mb-8 max-w-2xl">Currently in testing. I connected a Raspberry Pi to my cerebral cortex. Mild headaches reported. No refunds. Seriously, I see code when I close my eyes now.</p>
+               <p className="text-slate-400 leading-relaxed text-lg font-light mb-8 max-w-2xl">Currently in testing. I connected a Raspberry Pi to my cerebral cortex. Mild headaches reported.</p>
                <div className="text-xs font-bold tracking-widest text-rose-500 uppercase px-4 py-2 border border-rose-500/30 rounded-full inline-block">Testing Phase</div>
             </div>
          </motion.div>
       </section>
 
-      <footer className="text-center py-20 text-slate-500 font-medium">
-         &copy; 2026. The future is frictionless.
+      <footer className="text-center py-20 text-slate-500 font-medium cursor-pointer" onClick={()=>navigate('/')}>
+         <div className="flex items-center justify-center gap-2 hover:text-white transition-colors"><ChevronLeft size={16}/> Back to Home</div>
       </footer>
     </div>
   )
