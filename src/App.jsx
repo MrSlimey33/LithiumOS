@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 import React, { useRef, useState, useEffect } from 'react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { Feather, Wind, Zap, Shield, ArrowRight, Layers, Maximize, Cpu, Terminal, CheckCircle2, XCircle } from 'lucide-react';
@@ -307,7 +308,7 @@ export default function App() {
                whileInView={{ opacity: 1, y: 0, scale: 1 }}
                viewport={{ once: true, margin: "-200px" }}
                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-               className="w-full aspect-[16/10] md:aspect-[21/9] bg-white rounded-t-3xl shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden relative isolate ring-1 ring-white/10"
+               className="w-[95%] max-w-[1600px] mx-auto h-[750px] bg-white rounded-[2rem] shadow-[0_50px_100px_rgba(0,0,0,0.5)] overflow-hidden relative isolate ring-1 ring-white/10"
             >
                <div className="absolute inset-0">
                   <LithiumOS />
