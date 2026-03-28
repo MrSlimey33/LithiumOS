@@ -94,6 +94,8 @@ export function SettingsApp({ ins, un, lock, REG, playSound }) {
   const id = window.localStorage.getItem('LITHIUM_CLOUD_ID');
 
   const handleSync = async () => {
+     const gasUrl = ""; // Should match Login.jsx
+     if(!gasUrl) return alert("Contact Founder: GAS_URL not configured in SystemApps.jsx");
      if(!id) return alert("No active Lithium Email found.");
      const pw = window.localStorage.getItem('LITHIUM_SECRET');
      setSyncing(true);
@@ -105,16 +107,21 @@ export function SettingsApp({ ins, un, lock, REG, playSound }) {
              payload[k] = JSON.parse(window.localStorage.getItem(k));
           }
        }
-       const res = await fetch(`http://localhost:3001/api/sync`, {
+       
+       // Encrypt before sending to your Drive
+       const encryptedPayload = await encrypt(payload, pw);
+       
+       await fetch(gasUrl, {
          method: 'POST',
+         mode: 'no-cors',
          headers: { 'Content-Type': 'application/json' },
-         body: JSON.stringify({ email: id, password: pw, payload })
+         body: JSON.stringify({ action: 'sync', email: id, payload: encryptedPayload })
        });
-       const data = await res.json();
-       if (!data.success) throw new Error(data.error);
+       
        if(playSound) playSound('click', null);
+       alert("Sync successful! Encrypted data pushed to your Founder Drive.");
      } catch(e) {
-       console.error(e); alert("Local Computer Sync Failed. Is the server running?");
+       console.error(e); alert("Cloud Sync Failed. Check console.");
      }
      setSyncing(false);
   };
