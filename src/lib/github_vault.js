@@ -66,7 +66,10 @@ async function getFileSha() {
     }
   });
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error("Failed to get file SHA");
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(`Failed to get file SHA: ${res.status} ${errorData.message || ''}`);
+  }
   const data = await res.json();
   return data.sha;
 }
