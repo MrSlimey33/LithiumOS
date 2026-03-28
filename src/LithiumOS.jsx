@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
-import { Calculator, FileText, Settings, Store, CloudSun, Camera, Wifi, Battery, Search, Lock, Mic, Image as ImageIcon, Clock, Music, Terminal, Shield, Activity, LocateFixed, Globe, Palette, LogOut, ChevronLeft, X, Minus, Maximize2, Zap, Code2, Signal, Plus } from 'lucide-react';
+import { Calculator, FileText, Settings, Store, CloudSun, Camera, Wifi, Battery, Search, Lock, Mic, Image as ImageIcon, Clock, Music, Terminal, Shield, Activity, LocateFixed, Globe, Palette, LogOut, ChevronLeft, X, Minus, Maximize2, Zap, Code2, Signal, Plus, Plane, Moon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // Import All Apps
@@ -8,6 +8,7 @@ import { TerminalApp, NotesApp, CalculatorApp, SettingsApp, VaultApp, ClockApp }
 import { SynthesiaApp, CameraApp, MemosApp, PhotosApp, CanvasApp } from './apps/MediaApps';
 import { WeatherApp, BrowserApp, CpuApp, RadarApp } from './apps/NetworkApps';
 import { StoreApp, DeveloperStudioApp } from './apps/StoreApps';
+import { MusicApp, FileExplorerApp } from './apps/ExperienceApps';
 
 const REG = {
   terminal: { n: 'Console', ic: Terminal, c: 'from-slate-800 to-slate-900', t: 'text-slate-100', d: 0, comp: TerminalApp, menus: ['Shell', 'Edit', 'View', 'Search', 'Terminal'] },
@@ -27,6 +28,8 @@ const REG = {
   cpu: { n: 'Metrics', ic: Activity, c: 'from-teal-300 to-emerald-400', t: 'text-white', d: 1, comp: CpuApp, menus: ['File', 'Edit', 'View', 'Window'] },
   memos: { n: 'Voice', ic: Mic, c: 'from-orange-300 to-red-400', t: 'text-white', d: 1, comp: MemosApp, menus: ['File', 'Edit', 'Controls', 'Window'] },
   radar: { n: 'Radar', ic: LocateFixed, c: 'from-lime-400 to-green-500', t: 'text-white', d: 1, comp: RadarApp, menus: ['File', 'Edit', 'View', 'Network'] },
+  music: { n: 'Music', ic: Music, c: 'from-fuchsia-500 to-indigo-600', t: 'text-white', d: 0, comp: MusicApp, menus: ['Library', 'Playback', 'View', 'Window'] },
+  files: { n: 'Files', ic: Folder, c: 'from-amber-400 to-yellow-500', t: 'text-amber-900', d: 0, comp: FileExplorerApp, menus: ['Go', 'View', 'Edit', 'Tools'] },
 };
 
 let audioCtxInstance = null;
@@ -294,12 +297,14 @@ export default function LithiumOS({ previewMode = false }) {
 
   // ------------------- MOBILE RENDER -------------------
   if (isMobile && !previewMode) {
+    const [showControlCenter, setShowControlCenter] = useState(false);
+
     return (
-       <div className="absolute inset-0 bg-[#0c0c0e] overflow-hidden font-sans text-slate-800 select-none flex flex-col" style={{ backgroundImage: `url(${wallpapers[wallpaperIdx]})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-          <div className="absolute inset-0 backdrop-blur-md bg-black/30" />
+       <div className="absolute inset-0 bg-[#0c0c0e] overflow-hidden font-sans text-slate-100 select-none flex flex-col no-tap-highlight" style={{ backgroundImage: `url(${wallpapers[wallpaperIdx]})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+          <div className="absolute inset-0 backdrop-blur-md bg-black/40" />
           
           {/* MOBILE STATUS BAR */}
-          <div className="h-10 flex items-center justify-between px-6 z-[60] text-white text-[12px] font-bold tracking-tight">
+          <div className="h-10 flex items-center justify-between px-6 z-[160] text-white text-[12px] font-bold tracking-tight safe-top" onClick={() => setShowControlCenter(true)}>
              <div className="flex items-center gap-1">
                 <span>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
                 <Signal size={12} className="opacity-80"/>
@@ -315,47 +320,141 @@ export default function LithiumOS({ previewMode = false }) {
 
           <AnimatePresence mode="wait">
             {activeMobileApp ? (
-              <motion.div key="app-layer" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="absolute inset-x-0 bottom-0 top-0 z-[100] bg-white flex flex-col shadow-2xl">
-                 <div className="h-14 bg-white/90 backdrop-blur border-b border-slate-200 flex items-center justify-between px-4 z-50 shrink-0">
-                    <button onClick={() => setActiveMobileApp(null)} className="flex items-center gap-1 text-blue-600 font-bold active:bg-blue-50 px-3 py-1.5 rounded-xl transition-colors"><ChevronLeft size={22}/> Back</button>
-                    <span className="font-bold text-slate-800 text-base">{REG[activeMobileApp].n}</span>
-                    <div className="w-20"/>
+              <motion.div key="app-layer" initial={{ x: '100%', filter: 'brightness(1.5)' }} animate={{ x: 0, filter: 'brightness(1)' }} exit={{ x: '100%', opacity: 0 }} transition={{ type: "spring", damping: 28, stiffness: 220, mass: 1 }} className="absolute inset-x-0 bottom-0 top-0 z-[150] bg-white flex flex-col shadow-2xl overflow-hidden">
+                 <div className="h-14 bg-white/95 backdrop-blur-xl border-b border-slate-100 flex items-center justify-between px-4 z-50 shrink-0 safe-top">
+                    <button onClick={() => setActiveMobileApp(null)} className="flex items-center gap-0.5 text-blue-600 font-bold active:bg-blue-50 px-3 py-1.5 rounded-2xl transition-colors"><ChevronLeft size={22}/> Back</button>
+                    <span className="font-extrabold text-slate-900 text-[15px] tracking-tight">{REG[activeMobileApp].n}</span>
+                    <button className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-900" onClick={() => setActiveMobileApp(null)}><X size={20}/></button>
                  </div>
-                 <div className="flex-1 overflow-hidden bg-white relative">{renderCurrentApp(activeMobileApp)}</div>
-                 <div className="h-8 bg-white flex items-center justify-center shrink-0">
-                    <div className="w-32 h-1.5 bg-slate-200 rounded-full" onClick={() => setActiveMobileApp(null)}/>
+                 <div className="flex-1 overflow-hidden bg-slate-50 relative">{renderCurrentApp(activeMobileApp)}</div>
+                 <div className="h-8 bg-white flex items-center justify-center shrink-0 safe-bottom">
+                    <div className="w-32 h-1.5 bg-slate-200 rounded-full active:bg-slate-400 transition-colors" onClick={() => setActiveMobileApp(null)}/>
                  </div>
               </motion.div>
             ) : (
-              <motion.div key="home-layer" initial={{ scale: 1.1, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex-1 relative z-10 flex flex-col p-6 overflow-y-auto scrollbar-hide pt-10">
-                <div className="mb-10 text-center">
-                   <h1 className="text-white text-5xl font-black tracking-tighter drop-shadow-xl mb-1 italic">Lithium</h1>
-                   <p className="text-white/60 text-xs font-bold tracking-widest uppercase">Mobile Core v4.2</p>
+              <motion.div key="home-layer" initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 1.05, opacity: 0 }} className="flex-1 relative z-10 flex flex-col p-6 overflow-y-auto scrollbar-hide pt-4">
+                
+                {/* WIDGETS SECTION */}
+                <div className="grid grid-cols-2 gap-4 mb-10 mt-4">
+                   <motion.div whileTap={{ scale: 0.98 }} className="glass-dark aspect-square rounded-[2.5rem] p-5 flex flex-col justify-between">
+                      <Clock size={24} className="text-blue-400" />
+                      <div>
+                         <div className="text-4xl font-bold tracking-tighter">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</div>
+                         <div className="text-[10px] font-bold text-white/50 uppercase tracking-widest">{time.toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' })}</div>
+                      </div>
+                   </motion.div>
+                   <div className="flex flex-col gap-4">
+                      <motion.div whileTap={{ scale: 0.98 }} className="glass-dark flex-1 rounded-[2.5rem] p-5 flex items-center gap-4">
+                         <div className="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center"><CloudSun size={20} className="text-blue-400" /></div>
+                         <div>
+                            <div className="text-lg font-bold leading-none">24°C</div>
+                            <div className="text-[10px] font-bold text-white/40 uppercase">Mostly Clear</div>
+                         </div>
+                      </motion.div>
+                      <motion.div whileTap={{ scale: 0.98 }} className="glass-dark flex-1 rounded-[2.5rem] p-5 flex items-center gap-4 text-emerald-400">
+                         <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center"><Activity size={20} /></div>
+                         <div>
+                            <div className="text-lg font-bold leading-none">8.4k</div>
+                            <div className="text-[10px] font-bold text-white/40 uppercase">Kernels/s</div>
+                         </div>
+                      </motion.div>
+                   </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-y-10 gap-x-6">
+                <div className="mb-8 px-2 flex justify-between items-end">
+                   <div>
+                      <h2 className="text-3xl font-black tracking-tighter leading-none italic">Lithium</h2>
+                      <p className="text-white/40 text-[10px] font-bold tracking-widest uppercase mt-1">Founders Edition v4.2</p>
+                   </div>
+                   <button onClick={() => setShowControlCenter(true)} className="w-10 h-10 rounded-full glass flex items-center justify-center text-white"><Settings size={18} /></button>
+                </div>
+
+                <div className="grid grid-cols-4 gap-y-8 gap-x-4 mb-32">
                    {Object.keys(REG).map(id => {
                       const a = REG[id]; const Ic = a.ic;
                       return (
-                         <motion.div whileTap={{ scale: 0.9 }} key={id} className="flex flex-col items-center gap-2" onClick={(e) => launchApp(id, e)}>
-                            <div className={`w-16 h-16 rounded-[1.4rem] flex items-center justify-center bg-gradient-to-br ${a.c} ${a.t} shadow-[0_10px_20px_rgba(0,0,0,0.3),inset_0_2px_10px_rgba(255,255,255,0.2)] border border-white/20`}><Ic size={32}/></div>
-                            <span className="text-[10px] font-bold text-white text-center drop-shadow-md tracking-wide px-1">{a.n}</span>
+                         <motion.div whileTap={{ scale: 0.9 }} key={id} className="flex flex-col items-center gap-2 group" onClick={(e) => launchApp(id, e)}>
+                            <div className={`w-16 h-16 rounded-[1.6rem] flex items-center justify-center bg-gradient-to-br ${a.c} ${a.t} shadow-[0_12px_24px_rgba(0,0,0,0.4),inset_0_2px_10px_rgba(255,255,255,0.25)] border border-white/20 relative group-active:brightness-110 transition-all`}>
+                               <Ic size={30} className="drop-shadow-lg" />
+                               {id === 'devstudio' && <div className="absolute -top-1 -right-1 w-5 h-5 bg-blue-500 rounded-full border-2 border-[#1a1a2e] flex items-center justify-center"><Zap size={10} className="text-white fill-white" /></div>}
+                            </div>
+                            <span className="text-[10px] font-bold text-white/80 text-center tracking-tight px-1 truncate w-full">{a.n}</span>
                          </motion.div>
                       )
                    })}
                 </div>
 
                 {/* MOBILE DOCK */}
-                <div className="absolute bottom-6 left-6 right-6 h-24 bg-white/10 backdrop-blur-2xl rounded-[2.5rem] border border-white/20 flex items-center justify-around px-4 shadow-2xl">
-                   {['browser', 'notes', 'terminal', 'settings'].map(id => {
+                <div className="fixed bottom-8 left-6 right-6 h-24 glass rounded-[3rem] flex items-center justify-around px-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] border-white/30 backdrop-blur-3xl">
+                   {['browser', 'notes', 'terminal', 'vault'].map(id => {
                       const a = REG[id]; const Ic = a.ic;
                       return (
-                        <motion.div whileTap={{ scale: 0.9, y: -5 }} key={`dock-${id}`} className={`w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br ${a.c} ${a.t} shadow-lg border border-white/20`} onClick={(e) => launchApp(id, e)}><Ic size={28}/></motion.div>
+                        <motion.div whileTap={{ scale: 0.85, y: -8 }} key={`dock-${id}`} className={`w-16 h-16 rounded-[1.4rem] flex items-center justify-center bg-gradient-to-br ${a.c} ${a.t} shadow-xl border border-white/30 transition-transform`} onClick={(e) => launchApp(id, e)}>
+                           <Ic size={28} className="drop-shadow-md" />
+                        </motion.div>
                       )
                    })}
                 </div>
+
+                {/* VISUAL HOME INDICATOR */}
+                <div className="fixed bottom-2 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-white/20 rounded-full z-[110]" />
               </motion.div>
             )}
+          </AnimatePresence>
+
+          {/* MOBILE CONTROL CENTER */}
+          <AnimatePresence>
+             {showControlCenter && (
+                <motion.div 
+                  initial={{ y: '-100%' }} animate={{ y: 0 }} exit={{ y: '-100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} 
+                  className="absolute inset-0 z-[200] glass-dark backdrop-blur-3xl p-8 pt-16 flex flex-col gap-8"
+                >
+                   <div className="flex justify-between items-center">
+                      <h3 className="text-2xl font-black italic tracking-tighter">Command Center</h3>
+                      <button onClick={() => setShowControlCenter(false)} className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center"><X size={20}/></button>
+                   </div>
+                   
+                   <div className="grid grid-cols-2 gap-4">
+                      <div className="bg-blue-600 rounded-3xl p-6 flex flex-col justify-between aspect-square shadow-lg shadow-blue-500/20">
+                         <Wifi size={32} />
+                         <div>
+                            <div className="text-lg font-bold">LITH_NET_5G</div>
+                            <div className="text-xs font-bold opacity-60">Connected</div>
+                         </div>
+                      </div>
+                      <div className="bg-slate-800 rounded-3xl p-6 flex flex-col justify-between aspect-square">
+                         <Battery size={32} className="text-emerald-400" />
+                         <div>
+                            <div className="text-lg font-bold">84%</div>
+                            <div className="text-xs font-bold opacity-40">Power Optimal</div>
+                         </div>
+                      </div>
+                   </div>
+
+                   <div className="grid grid-cols-4 gap-4">
+                      {[Signal, Plane, Search, Moon].map((Ic, i) => (
+                         <div key={i} className="aspect-square rounded-2xl bg-white/5 flex items-center justify-center active:bg-white/20 transition-colors"><Ic size={24} className="text-white/60" /></div>
+                      ))}
+                   </div>
+
+                   <div className="space-y-6 mt-4">
+                      <div className="space-y-2">
+                         <div className="flex justify-between text-[10px] font-bold tracking-widest uppercase opacity-40">Brightness</div>
+                         <div className="h-6 bg-white/10 rounded-full relative overflow-hidden">
+                            <div className="absolute inset-y-0 left-0 bg-white/30 w-3/4 rounded-full" />
+                         </div>
+                      </div>
+                      <div className="space-y-2">
+                         <div className="flex justify-between text-[10px] font-bold tracking-widest uppercase opacity-40">Audio Output</div>
+                         <div className="h-6 bg-white/10 rounded-full relative overflow-hidden">
+                            <div className="absolute inset-y-0 left-0 bg-blue-500/50 w-1/2 rounded-full" />
+                         </div>
+                      </div>
+                   </div>
+
+                   <button onClick={handleLogout} className="mt-auto w-full py-5 rounded-3xl bg-rose-500/20 text-rose-500 font-black tracking-tight border border-rose-500/30 active:scale-95 transition-transform flex items-center justify-center gap-3"><LogOut size={20}/> TERM_SESSION</button>
+                </motion.div>
+             )}
           </AnimatePresence>
        </div>
     );
@@ -394,11 +493,52 @@ export default function LithiumOS({ previewMode = false }) {
                </div>
             ))}
          </div>
-         <div className="flex gap-3 h-full items-center px-1">
-            {!previewMode && <button onClick={handleLogout} className="hover:bg-black/5 px-1.5 h-5 rounded-[4px] flex items-center gap-1.5 opacity-60 hover:opacity-100 transition-opacity text-[12px] font-medium"><LogOut size={12}/> Quit</button>}
-            <div className="flex gap-2.5 text-[#1d1d1f] opacity-60"><Wifi size={13}/><Battery size={14} /></div>
+          <div className="flex gap-3 h-full items-center px-1">
+            {!previewMode && <button onClick={handleLogout} className="hover:bg-black/5 px-2 h-5 rounded-[4px] flex items-center gap-1.5 opacity-60 hover:opacity-100 transition-opacity text-[12px] font-medium"><LogOut size={12}/> Quit</button>}
+            <button 
+              onClick={(e) => { e.stopPropagation(); setActiveMenu(activeMenu === 'control' ? null : 'control') }}
+              className={`flex gap-2 px-2 h-5 rounded-[4px] items-center transition-colors ${activeMenu === 'control' ? 'bg-blue-500 text-white' : 'hover:bg-black/5 opacity-80 hover:opacity-100'}`}
+            >
+               <Wifi size={13}/><Battery size={14} />
+            </button>
             <span className="font-medium text-[12px] tracking-tight opacity-90">{time.toLocaleString([], { weekday: 'short', month:'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
-         </div>
+          </div>
+          
+          <AnimatePresence>
+             {activeMenu === 'control' && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }} animate={{ opacity: 1, y: 0, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }}
+                  className="absolute top-[32px] right-3 w-80 glass-dark rounded-2xl p-6 z-[300] shadow-2xl border-white/10"
+                  onClick={e => e.stopPropagation()}
+                >
+                   <div className="grid grid-cols-2 gap-3 mb-6">
+                      <div className="bg-blue-600 rounded-2xl p-4 flex flex-col justify-between aspect-video">
+                         <Wifi size={20} />
+                         <span className="text-xs font-bold truncate">LITH_NET_5G</span>
+                      </div>
+                      <div className="bg-white/10 rounded-2xl p-4 flex flex-col justify-between aspect-video">
+                         <Activity size={20} className="text-emerald-400" />
+                         <span className="text-xs font-bold">8.4k K/s</span>
+                      </div>
+                   </div>
+                   <div className="space-y-4">
+                      <div className="space-y-1.5">
+                         <div className="flex justify-between text-[10px] font-black uppercase tracking-widest opacity-40">Brightness</div>
+                         <div className="h-4 bg-white/10 rounded-full relative overflow-hidden"><div className="absolute inset-y-0 left-0 bg-white/40 w-3/4 rounded-full" /></div>
+                      </div>
+                      <div className="space-y-1.5">
+                         <div className="flex justify-between text-[10px] font-black uppercase tracking-widest opacity-40">Output Volume</div>
+                         <div className="h-4 bg-white/10 rounded-full relative overflow-hidden"><div className="absolute inset-y-0 left-0 bg-blue-500/60 w-1/2 rounded-full" /></div>
+                      </div>
+                   </div>
+                   <div className="mt-6 pt-6 border-t border-white/10 grid grid-cols-4 gap-2">
+                       {[Music, Camera, Shield, Plane, Moon, Settings].map((Ic, i) => (
+                          <button key={i} className="aspect-square rounded-xl bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors"><Ic size={18} className="opacity-60" /></button>
+                       ))}
+                   </div>
+                </motion.div>
+             )}
+          </AnimatePresence>
       </div>
 
       {/* DESKTOP AREA */}
@@ -473,22 +613,21 @@ export default function LithiumOS({ previewMode = false }) {
              >
                 <Search size={26} className="text-slate-700" />
                 <div className="absolute -top-10 opacity-0 group-hover:opacity-100 bg-[#1a1a2e]/95 text-white text-[10px] px-2.5 py-1 rounded-md font-semibold transition-opacity pointer-events-none whitespace-nowrap" style={{ backdropFilter: 'blur(12px)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>Launchpad</div>
-             </motion.button>
-             <div className="w-[0.5px] h-10 bg-black/10 mx-1 rounded-full self-center"/>
-             {apps.slice(0, 10).map((id) => {
-               const a = REG[id]; 
-               const isOpen = wins.find(w=>w.id===id && !w.min);
-               return (
-                 <DockItem 
-                   key={`dock-${id}`} 
-                   id={id} 
-                   app={a} 
-                   isOpen={isOpen}
-                   mouseX={mouseX}
-                   onClick={(e)=>{launchApp(id,e); if(isOpen&&isOpen.min)focusApp(id)}} 
-                 />
-               );
-             })}
+             </motion.button>              <div className="w-[0.5px] h-10 bg-black/10 mx-1 rounded-full self-center"/>
+              {['browser', 'notes', 'files', 'music', 'terminal', 'vault', 'calc', 'devstudio', 'settings'].map((id) => {
+                const a = REG[id]; 
+                const isOpen = wins.find(w=>w.id===id && !w.min);
+                return (
+                  <DockItem 
+                    key={`dock-${id}`} 
+                    id={id} 
+                    app={a} 
+                    isOpen={isOpen}
+                    mouseX={mouseX}
+                    onClick={(e)=>{launchApp(id,e); if(isOpen&&isOpen.min)focusApp(id)}} 
+                  />
+                );
+              })}
            </div>
         </motion.div>
 
