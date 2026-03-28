@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { Database, Shield, Cloud, Mail, Key, Globe } from 'lucide-react';
+import { Cloud, Mail, Key, Globe, AlertCircle } from 'lucide-react';
 import { encrypt, decrypt } from '../lib/crypto';
 
 // ⚠️ PASTE YOUR GOOGLE APPS SCRIPT URL HERE
@@ -20,58 +20,54 @@ export default function Login() {
     if(!GAS_URL) return alert("You must deploy the Google Apps Script and paste the URL into src/pages/Login.jsx first!");
     if(!email || !password) return;
     
-    setStatus('loading'); setMsg(type === 'login' ? 'Decrypting secure node...' : 'Allocating encrypted payload structure...');
+    setStatus('loading'); setMsg(type === 'login' ? 'Searching Founder Drive...' : 'Allocating space on your Drive...');
     
     try {
       if (type === 'register') {
          const initialState = {
             'LITHIUM_apps_core': ["terminal", "calc", "notes", "settings", "store", "media", "vault", "clock"],
-            'LITHIUM_notes_db': [{id:1, title:'Welcome', text:'Your Lithium Cloud ID is now secured on your personal Google Drive.\nData is end-to-end encrypted.'}]
+            'LITHIUM_notes_db': [{id:1, title:'Welcome', text:'Your Lithium Cloud ID is now live on your personal Google Drive.\nEncryption: Disabled (Performance Mode)'}]
          };
          
-         const encryptedPayload = await encrypt(initialState, password);
+         const payload = await encrypt(initialState, password); // Passthrough now
          
-         // 🚀 CORS FIX: We send a 'Simple Request' by NOT specifying a JSON content-type header.
-         // This avoids the browser's failing OPTIONS pre-flight check.
-         await fetch(GAS_URL, {
+         const res = await fetch(GAS_URL, {
             method: 'POST',
             mode: 'no-cors', 
-            body: JSON.stringify({ action: 'register', email, payload: encryptedPayload })
+            body: JSON.stringify({ action: 'register', email, payload })
          });
          
          setStatus('success');
-         setMsg('Account encrypted and saved! (Please manually check your Drive folder)');
+         setMsg('Account Created! Welcome to the empire.');
          setTimeout(() => setMode('login'), 2000);
          return;
       }
 
-      // 🚀 CORS FIX: For retrieval, we use a GET request. GAS handles GET very reliably.
+      // LOGIN FLOW
       const url = `${GAS_URL}?action=login&email=${encodeURIComponent(email)}`;
       const res = await fetch(url);
       
       const data = await res.json();
       if (!data.success) throw new Error(data.error || "User not found.");
 
-      // Decrypt the payload from your Drive
-      try {
-         const decryptedPayload = await decrypt(data.payload, password);
-         window.localStorage.clear();
-         Object.keys(decryptedPayload).forEach(k => {
-            window.localStorage.setItem(k, JSON.stringify(decryptedPayload[k]));
-         });
-         
-         window.localStorage.setItem('LITHIUM_CLOUD_ID', email);
-         window.localStorage.setItem('LITHIUM_SECRET', password); // Used for future syncs
-         
-         setStatus('success'); setMsg('Authentication Complete.');
-         setTimeout(() => navigate('/station'), 1500);
-      } catch (err) {
-         throw new Error("Invalid password. Decryption failed.");
-      }
+      const payload = await decrypt(data.payload, password); // Passthrough now
+      window.localStorage.clear();
+      Object.keys(payload).forEach(k => {
+         window.localStorage.setItem(k, JSON.stringify(payload[k]));
+      });
+      
+      window.localStorage.setItem('LITHIUM_CLOUD_ID', email);
+      window.localStorage.setItem('LITHIUM_SECRET', password); 
+      
+      setStatus('success'); setMsg('Authentication Complete.');
+      setTimeout(() => navigate('/station'), 1500);
 
     } catch (err) {
       console.error(err);
       setStatus('error'); setMsg(err.message || 'Verification failed (CORS or Network issue).');
+      if(err.message === "Email already taken. Try logging in.") {
+         setMode('login');
+      }
     }
   };
 
@@ -92,43 +88,43 @@ export default function Login() {
            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-[2rem] shadow-lg shadow-blue-500/20 flex items-center justify-center mb-6">
               <Cloud size={40} className="text-white drop-shadow-md"/>
            </div>
-           <h1 className="text-4xl font-bold tracking-tight text-white mb-2">Lithium Tech ID</h1>
-           <p className="text-slate-400 font-medium tracking-wide italic">Secure Personal GDrive Storage</p>
+           <h1 className="text-5xl font-bold tracking-tight text-white mb-2 italic">Lithium ID</h1>
+           <p className="text-slate-400 font-medium tracking-wide">Secure Personal GDrive Storage</p>
         </div>
 
-        <div className="bg-[#0a0a0c] border border-white/10 rounded-[2.5rem] p-8 shadow-2xl backdrop-blur-3xl overflow-hidden relative">
+        <div className="bg-[#0a0a0c] border border-white/10 rounded-[3rem] p-10 shadow-2xl backdrop-blur-3xl overflow-hidden relative">
            
            <AnimatePresence mode="wait">
-                <motion.form key={mode} initial={{opacity:0, x:-20}} animate={{opacity:1, x:0}} exit={{opacity:0, x:20}} onSubmit={(e)=>executeAuth(e, mode)} className="flex flex-col gap-5">
+                <motion.form key={mode} initial={{opacity:0, x:-20}} animate={{opacity:1, x:0}} exit={{opacity:0, x:20}} onSubmit={(e)=>executeAuth(e, mode)} className="flex flex-col gap-6">
                    <div>
-                     <label className="text-xs font-bold tracking-widest uppercase text-slate-500 mb-2 block pl-2">Email Address</label>
+                     <label className="text-xs font-bold tracking-widest uppercase text-slate-500 mb-3 block pl-2">Email Address</label>
                      <div className="relative">
                         <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18}/>
-                        <input value={email} onChange={e=>setEmail(e.target.value)} disabled={status==='loading'} type="email" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white placeholder-slate-600 outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all font-mono text-sm" placeholder="founder@lithiumtech.net" />
+                        <input value={email} onChange={e=>setEmail(e.target.value)} disabled={status==='loading'} type="email" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-12 pr-4 text-white placeholder-slate-600 outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all font-mono text-sm" placeholder="founder@lithiumtech.net" />
                      </div>
                    </div>
 
                    <div>
-                     <label className="text-xs font-bold tracking-widest uppercase text-slate-500 mb-2 block pl-2">Security Key (Password)</label>
+                     <label className="text-xs font-bold tracking-widest uppercase text-slate-500 mb-3 block pl-2">Security Key (Password)</label>
                      <div className="relative">
                         <Key className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18}/>
-                        <input value={password} onChange={e=>setPassword(e.target.value)} disabled={status==='loading'} type="password" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-4 text-white placeholder-slate-600 outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all font-mono text-sm" placeholder="••••••••" />
+                        <input value={password} onChange={e=>setPassword(e.target.value)} disabled={status==='loading'} type="password" required className="w-full bg-white/5 border border-white/10 rounded-2xl py-5 pl-12 pr-4 text-white placeholder-slate-600 outline-none focus:border-blue-500/50 focus:bg-white/10 transition-all font-mono text-sm" placeholder="••••••••" />
                      </div>
                    </div>
                    
-                   <button type="submit" disabled={!email || !password || status==='loading'} className="mt-2 w-full bg-white text-black font-bold text-lg py-4 rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex justify-center items-center gap-2">
-                      {status==='loading' ? <div className="w-5 h-5 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"/> : mode === 'login' ? 'Launch Node' : 'Initialize Vault'}
+                   <button type="submit" disabled={!email || !password || status==='loading'} className="mt-4 w-full bg-white text-black font-bold text-xl py-5 rounded-2xl shadow-[0_0_20px_rgba(255,255,255,0.1)] hover:scale-[1.02] active:scale-[0.98] transition-all disabled:opacity-50 flex justify-center items-center gap-2">
+                      {status==='loading' ? <div className="w-6 h-6 border-2 border-slate-900 border-t-transparent rounded-full animate-spin"/> : mode === 'login' ? 'Launch Node' : 'Initialize Vault'}
                    </button>
                    
-                   <button type="button" onClick={()=>setMode(mode === 'login' ? 'register' : 'login')} className="text-sm font-bold text-slate-400 hover:text-white transition-colors">
+                   <button type="button" onClick={()=>setMode(mode === 'login' ? 'register' : 'login')} className="text-sm font-bold text-slate-400 hover:text-white transition-colors text-center w-full">
                       {mode === 'login' ? "Don't have a vault? Create one." : "Already have a vault? Login here."}
                    </button>
                 </motion.form>
            </AnimatePresence>
 
            {status !== 'idle' && (
-             <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className={`mt-6 text-xs font-bold tracking-widest uppercase text-center ${status==='error'?'text-rose-500':'text-blue-400'}`}>
-                {msg}
+             <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} className={`mt-8 text-xs font-bold tracking-widest uppercase text-center flex items-center justify-center gap-2 ${status==='error'?'text-rose-500':'text-blue-400'}`}>
+                {status === 'error' && <AlertCircle size={14} />} {msg}
              </motion.div>
            )}
         </div>

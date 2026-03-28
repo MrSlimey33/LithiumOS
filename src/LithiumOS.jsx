@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calculator, FileText, Settings, Store, CloudSun, Camera, Wifi, Battery, Search, Lock, Mic, Image as ImageIcon, Clock, Music, Terminal, Shield, Activity, LocateFixed, Globe, Palette, LogOut, ChevronLeft, X, Minus, Maximize2, Zap, Code2 } from 'lucide-react';
+import { Calculator, FileText, Settings, Store, CloudSun, Camera, Wifi, Battery, Search, Lock, Mic, Image as ImageIcon, Clock, Music, Terminal, Shield, Activity, LocateFixed, Globe, Palette, LogOut, ChevronLeft, X, Minus, Maximize2, Zap, Code2, Signal } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // Import All Apps
@@ -59,7 +59,7 @@ function Window({ w, focus, close, min, max, children, constraintsRef }) {
       initial={{ opacity: 0, scale: 0.9, y: 20 }}
       animate={{ opacity: 1, scale: 1, y: 0, 
                  width: w.max ? '100%' : w.w, 
-                 height: w.max ? '100%' : w.h, 
+                 height: w.max ? '100.2%' : w.h, 
                  x: w.max ? 0 : w.x, 
                  y: w.max ? 0 : w.y,
                  borderRadius: w.max ? '0px' : '20px'
@@ -116,11 +116,9 @@ export default function LithiumOS({ previewMode = false }) {
   const [startOpen, setStartOpen] = useState(false);
   const [q, setQ] = useState('');
   
-  const [activeMenu, setActiveMenu] = useState(null); // String like 'File', 'Edit'
-
+  const [activeMenu, setActiveMenu] = useState(null); 
   const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
   const [activeMobileApp, setActiveMobileApp] = useState(null);
-
   const containerRef = useRef(null);
   const [wallpaperIdx] = useState(Math.floor(Math.random() * 3));
   const wallpapers = [
@@ -169,24 +167,20 @@ export default function LithiumOS({ previewMode = false }) {
   const renderCurrentApp = (id) => {
     const AppComp = REG[id]?.comp;
     if (!AppComp) return <div className="p-8 text-center bg-white/50 w-full h-full text-slate-500">Module failed to load.</div>
-    
-    // Inject props dynamically
     return <AppComp playSound={playSound} useVDisk={useVDisk} audioCtx={audioCtx} ins={apps} setIns={setApps} un={(i) => setApps(apps.filter(x=>x!==i))} lock={()=>{setLocked(true);setWins([]); setActiveMobileApp(null)}} REG={REG} openDevStudio={()=>launchApp('devstudio', null)} />;
   };
 
   const handleLogout = () => {
-     localStorage.removeItem('LITHIUM_USER');
+     localStorage.removeItem('LITHIUM_CLOUD_ID');
      navigate('/login');
   };
 
-  // Click outside menu closes it
   useEffect(() => {
      const handleDocClick = () => setActiveMenu(null);
      window.addEventListener('click', handleDocClick);
      return () => window.removeEventListener('click', handleDocClick);
   }, []);
 
-  // Determine Active App
   const activeWindow = wins.length > 0 && !wins[wins.length-1].min ? wins[wins.length-1] : null;
   const activeMenus = activeWindow ? REG[activeWindow.id].menus : ['File', 'Edit', 'View', 'Go', 'Window', 'Help'];
   const appName = activeWindow ? REG[activeWindow.id].n : 'Finder';
@@ -194,39 +188,69 @@ export default function LithiumOS({ previewMode = false }) {
   // ------------------- MOBILE RENDER -------------------
   if (isMobile && !previewMode) {
     return (
-       <div className="absolute inset-0 bg-slate-900 overflow-hidden font-sans text-slate-800 select-none flex flex-col pt-10 pb-8" style={{ backgroundImage: `url(${wallpapers[wallpaperIdx]})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-         <div className="absolute inset-0 bg-slate-900/40 backdrop-blur-xl mix-blend-overlay" />
-         <div className="absolute top-0 left-0 right-0 h-10 flex items-center justify-between px-6 z-50 text-white text-xs font-semibold drop-shadow-md">
-            <span>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-            <div className="flex gap-2"><Wifi size={14}/><Battery size={14} /></div>
-         </div>
-         <AnimatePresence mode="wait">
-           {activeMobileApp ? (
-             <motion.div key="app" initial={{ opacity: 0, scale: 0.95, y: 20 }} animate={{ opacity: 1, scale: 1, y: 0 }} exit={{ opacity: 0, scale: 0.95, y: 20 }} transition={{ type: "spring", bounce: 0, duration: 0.4 }} className="absolute inset-0 z-40 bg-white flex flex-col pt-[max(env(safe-area-inset-top),20px)]">
-                <div className="h-14 bg-white/90 backdrop-blur border-b border-slate-200 flex items-center justify-between px-4 z-50 shrink-0 shadow-sm">
-                   <button onClick={() => setActiveMobileApp(null)} className="flex items-center gap-1 text-blue-500 font-semibold"><ChevronLeft size={20}/> Back</button>
-                   <span className="font-bold text-slate-800 text-sm tracking-wide">{REG[activeMobileApp].n}</span>
-                   <div className="w-16"/>
+       <div className="absolute inset-0 bg-[#0c0c0e] overflow-hidden font-sans text-slate-800 select-none flex flex-col" style={{ backgroundImage: `url(${wallpapers[wallpaperIdx]})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+          <div className="absolute inset-0 backdrop-blur-md bg-black/30" />
+          
+          {/* MOBILE STATUS BAR */}
+          <div className="h-10 flex items-center justify-between px-6 z-[60] text-white text-[12px] font-bold tracking-tight">
+             <div className="flex items-center gap-1">
+                <span>{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false })}</span>
+                <Signal size={12} className="opacity-80"/>
+             </div>
+             <div className="flex gap-2 items-center">
+                <Wifi size={14} className="opacity-80"/>
+                <div className="flex items-center gap-1 bg-white/10 px-1.5 py-0.5 rounded-full border border-white/20">
+                   <span className="text-[10px]">84%</span>
+                   <Battery size={14} className="text-emerald-400" />
                 </div>
-                <div className="flex-1 overflow-hidden bg-slate-50 relative">{renderCurrentApp(activeMobileApp)}</div>
-             </motion.div>
-           ) : (
-             <motion.div key="home" className="flex-1 relative z-10 flex flex-col p-6 overflow-y-auto scrollbar-hide pt-10">
-               <h2 className="text-white text-3xl font-bold mb-8 drop-shadow-md">Lithium Center</h2>
-               <div className="grid grid-cols-4 gap-y-8 gap-x-4">
-                  {[...apps, 'devstudio'].filter((v,i,a)=>a.indexOf(v)===i).map(id => {
-                     const a = REG[id]; const Ic = a.ic;
-                     return (
-                        <div key={id} className="flex flex-col items-center gap-2" onClick={(e) => launchApp(id, e)}>
-                           <div className={`w-[4.5rem] h-[4.5rem] rounded-3xl flex items-center justify-center bg-gradient-to-br ${a.c} ${a.t} shadow-lg shadow-black/20 active:scale-95 transition-transform border border-white/20`}><Ic size={32}/></div>
-                           <span className="text-[11px] font-semibold text-white text-center drop-shadow-md tracking-wide">{a.n}</span>
-                        </div>
-                     )
-                  })}
-               </div>
-             </motion.div>
-           )}
-         </AnimatePresence>
+             </div>
+          </div>
+
+          <AnimatePresence mode="wait">
+            {activeMobileApp ? (
+              <motion.div key="app-layer" initial={{ x: '100%' }} animate={{ x: 0 }} exit={{ x: '100%' }} transition={{ type: "spring", damping: 25, stiffness: 200 }} className="absolute inset-x-0 bottom-0 top-0 z-[100] bg-white flex flex-col shadow-2xl">
+                 <div className="h-14 bg-white/90 backdrop-blur border-b border-slate-200 flex items-center justify-between px-4 z-50 shrink-0">
+                    <button onClick={() => setActiveMobileApp(null)} className="flex items-center gap-1 text-blue-600 font-bold active:bg-blue-50 px-3 py-1.5 rounded-xl transition-colors"><ChevronLeft size={22}/> Back</button>
+                    <span className="font-bold text-slate-800 text-base">{REG[activeMobileApp].n}</span>
+                    <div className="w-20"/>
+                 </div>
+                 <div className="flex-1 overflow-hidden bg-white relative">{renderCurrentApp(activeMobileApp)}</div>
+                 {/* App Home Indicator */}
+                 <div className="h-8 bg-white flex items-center justify-center shrink-0">
+                    <div className="w-32 h-1.5 bg-slate-200 rounded-full" onClick={() => setActiveMobileApp(null)}/>
+                 </div>
+              </motion.div>
+            ) : (
+              <motion.div key="home-layer" initial={{ scale: 1.1, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} className="flex-1 relative z-10 flex flex-col p-6 overflow-y-auto scrollbar-hide pt-10">
+                <div className="mb-10 text-center">
+                   <h1 className="text-white text-5xl font-black tracking-tighter drop-shadow-xl mb-1 italic">Lithium</h1>
+                   <p className="text-white/60 text-xs font-bold tracking-widest uppercase">Mobile Core v4.2</p>
+                </div>
+
+                <div className="grid grid-cols-4 gap-y-10 gap-x-6">
+                   {Object.keys(REG).map(id => {
+                      const a = REG[id]; const Ic = a.ic;
+                      return (
+                         <motion.div whileTap={{ scale: 0.9 }} key={id} className="flex flex-col items-center gap-2" onClick={(e) => launchApp(id, e)}>
+                            <div className={`w-16 h-16 rounded-[1.4rem] flex items-center justify-center bg-gradient-to-br ${a.c} ${a.t} shadow-[0_10px_20px_rgba(0,0,0,0.3),inset_0_2px_10px_rgba(255,255,255,0.2)] border border-white/20`}><Ic size={32}/></div>
+                            <span className="text-[10px] font-bold text-white text-center drop-shadow-md tracking-wide px-1">{a.n}</span>
+                         </motion.div>
+                      )
+                   })}
+                </div>
+
+                {/* MOBILE DOCK */}
+                <div className="absolute bottom-6 left-6 right-6 h-24 bg-white/10 backdrop-blur-2xl rounded-[2.5rem] border border-white/20 flex items-center justify-around px-4 shadow-2xl">
+                   {['browser', 'notes', 'terminal', 'settings'].map(id => {
+                      const a = REG[id]; const Ic = a.ic;
+                      return (
+                        <motion.div whileTap={{ scale: 0.9, y: -5 }} key={`dock-${id}`} className={`w-14 h-14 rounded-2xl flex items-center justify-center bg-gradient-to-br ${a.c} ${a.t} shadow-lg border border-white/20`} onClick={(e) => launchApp(id, e)}><Ic size={28}/></motion.div>
+                      )
+                   })}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
        </div>
     );
   }
@@ -234,22 +258,17 @@ export default function LithiumOS({ previewMode = false }) {
   // ------------------- DESKTOP RENDER -------------------
   return (
     <div className="absolute inset-0 bg-[#f8f9fb] overflow-hidden font-sans text-slate-800 flex flex-col text-sm select-none" ref={containerRef}>
-      
-      {/* MAC-STYLE MENUBAR */}
       <div className="h-8 bg-white/40 backdrop-blur-3xl border-b border-white/50 flex justify-between px-4 z-[200] text-slate-800 shadow-sm font-medium items-center relative select-none">
          <div className="flex items-center h-full text-[13px] font-semibold">
-            {/* Logo Dropdown (App Menu) */}
             <div className="relative h-full flex items-center">
               <button onClick={(e)=>{e.stopPropagation(); setActiveMenu('logo')}} className={`flex items-center gap-2 px-3 h-full transition-colors drop-shadow-sm font-bold ${activeMenu === 'logo' ? 'bg-white/70 shadow-sm rounded-md my-1 h-6' : 'hover:bg-white/60 rounded-md my-1 h-6'}`}>
                  <div className="w-3.5 h-3.5 bg-gradient-to-br from-cyan-400 to-blue-500 shadow-sm rounded-sm flex items-center justify-center"><div className="w-1.5 h-1.5 bg-white rounded-sm opacity-50"/></div>
                  {appName}
               </button>
               <AnimatePresence>
-                 {activeMenu === 'logo' && <DropdownMenu title={appName} options={['About '+appName, 'Preferences...', 'Services', 'Hide', 'Quit App']} close={()=>{if(activeWindow) closeApp(activeWindow.id)}} />}
+                 {activeMenu === 'logo' && <DropdownMenu title={appName} options={['About '+appName, 'Preferences...', 'Hide', 'Quit App']} close={()=>{if(activeWindow) closeApp(activeWindow.id)}} />}
               </AnimatePresence>
             </div>
-            
-            {/* Dynamic Menus based on Active App */}
             {activeMenus.map((menu) => (
                <div key={menu} className="relative h-full flex items-center">
                  <button onClick={(e)=>{e.stopPropagation(); setActiveMenu(menu)}} className={`px-3 h-full drop-shadow-sm font-medium ${activeMenu === menu ? 'bg-white/70 shadow-sm rounded-md my-1 h-6 text-blue-600' : 'hover:bg-white/60 rounded-md my-1 h-6'}`}>{menu}</button>
@@ -300,7 +319,7 @@ export default function LithiumOS({ previewMode = false }) {
                 <div className="absolute -top-12 opacity-0 group-hover:opacity-100 bg-slate-900 text-white text-xs px-3 py-1 rounded-full font-semibold transition-opacity pointer-events-none drop-shadow-md whitespace-nowrap">Search & Launch</div>
              </motion.button>
              <div className="w-[1.5px] h-12 bg-white/40 mx-2 rounded-full"/>
-             {[...apps, 'devstudio'].filter((v,i,a)=>a.indexOf(v)===i).slice(0, 10).map((id, index) => {
+             {apps.slice(0, 10).map((id, index) => {
                const a = REG[id]; const isOpen = wins.find(w=>w.id===id && !w.min); const Ic = a.ic;
                return (
                  <motion.button style={{originY: 1}} whileHover={{ y: -8, scale: 1.15 }} whileTap={{ scale: 0.95 }} key={`dock-${id}`} onClick={(e)=>{launchApp(id,e); if(isOpen&&isOpen.min)focusApp(id)}} className="relative w-16 h-16 rounded-[1.5rem] bg-transparent flex items-center justify-center cursor-pointer group z-40">
