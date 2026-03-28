@@ -1,28 +1,122 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Store, Zap, Sparkles, Code2, CheckCircle2, Send, Cpu } from 'lucide-react';
+import { Store, Zap, Sparkles, Code2, CheckCircle2, Send, Cpu, CloudOff, Loader2, Download, ExternalLink } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 
 export function StoreApp({ ins, setIns, REG, playSound, openDevStudio }) {
+  const [extApps, setExtApps] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('https://api.github.com/repos/MrSlimey33/LithiumOS/issues?labels=marketplace&state=open')
+      .then(res => res.json())
+      .then(data => {
+        const parsedApps = [];
+        for (const issue of data) {
+           try {
+             const body = issue.body || '';
+             const jsonMatch = body.match(/```json\n([\s\S]*?)\n```/);
+             if (jsonMatch && jsonMatch[1]) {
+                const appData = JSON.parse(jsonMatch[1]);
+                if (appData.name && appData.url) {
+                   parsedApps.push({
+                      id: `ext_${issue.id}`,
+                      title: appData.name,
+                      dev: appData.developer || issue.user.login,
+                      icon: appData.icon || 'Box',
+                      img: appData.color || 'from-slate-700 to-slate-900',
+                      desc: appData.description || 'No description provided.',
+                      url: appData.url
+                   });
+                }
+             }
+           } catch(e) {}
+        }
+        setExtApps(parsedApps);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const handleInstallExt = (app) => {
+     if(playSound) playSound('click', null);
+     const currentRaw = window.localStorage.getItem('LITHIUM_ext_apps');
+     const currentMap = currentRaw ? JSON.parse(currentRaw) : {};
+     currentMap[app.id] = app;
+     window.localStorage.setItem('LITHIUM_ext_apps', JSON.stringify(currentMap));
+     setIns([...ins, app.id]);
+  };
+
+  const coreUninstalled = Object.keys(REG).filter(k => REG[k].d === 1 && !ins.includes(k));
+
   return (
-    <div className="w-full h-full bg-slate-50/80 backdrop-blur-xl text-slate-800 flex flex-col">
-      <div className="p-8 pb-4 flex justify-between items-end border-b border-slate-200/50 mb-6 bg-white/50">
-        <h2 className="text-4xl font-bold tracking-tight flex items-center gap-4 text-slate-900"><Store className="text-purple-500" size={36}/> Market</h2>
-        <button onClick={()=>{if(playSound)playSound('open',{}); openDevStudio();}} className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-5 py-2.5 rounded-full font-bold text-sm shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all hover:-translate-y-1 group">
-           <Sparkles size={16} className="group-hover:rotate-12 transition-transform" /> Create App via AI
-        </button>
+    <div className="w-full h-full bg-slate-50/80 backdrop-blur-xl text-slate-800 flex flex-col pt-6 font-sans">
+      <div className="px-8 flex justify-between items-end border-b border-slate-200/50 pb-4 mb-2 shrink-0">
+        <h2 className="text-3xl font-black tracking-tight flex items-center gap-3 text-slate-900"><Store className="text-purple-500" size={32}/> Ecosystem</h2>
+        <div className="flex gap-3">
+           <a href="#/developers" target="_blank" className="flex items-center gap-2 bg-slate-900 text-white px-5 py-2.5 rounded-full font-bold text-xs shadow-lg hover:bg-slate-800 transition-all hover:-translate-y-1">
+              Publish Module <ExternalLink size={14} />
+           </a>
+           <button onClick={()=>{if(playSound)playSound('open',{}); openDevStudio();}} className="flex items-center gap-2 bg-gradient-to-r from-cyan-500 to-blue-600 text-white px-5 py-2.5 rounded-full font-bold text-xs shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all hover:-translate-y-1 group">
+              <Sparkles size={14} className="group-hover:rotate-12 transition-transform" /> Dev Studio
+           </button>
+        </div>
       </div>
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-6 flex-1 overflow-y-auto px-8 pb-10 scrollbar-hide">
-        {Object.keys(REG).filter(k => REG[k].d === 1 && !ins.includes(k)).map(id => {
-          const Ic = REG[id].ic;
-          return (
-          <motion.div initial={{opacity:0, scale:0.95}} animate={{opacity:1, scale:1}} key={`store-${id}`} className="bg-white/90 backdrop-blur p-8 rounded-[2rem] border border-white shadow-[0_10px_30px_rgba(0,0,0,0.02)] flex flex-col items-center justify-center text-center gap-4 hover:-translate-y-2 hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all">
-            <div className={`w-20 h-20 rounded-[1.8rem] flex items-center justify-center bg-gradient-to-br ${REG[id].c} ${REG[id].t} shadow-[inset_0_2px_10px_rgba(255,255,255,0.3)] shadow-md`}><Ic size={36}/></div>
-            <span className="font-bold text-slate-800 text-lg">{REG[id].n}</span>
-            <button onClick={(e)=>{if(playSound)playSound('click',e); setIns([...ins, id]);}} className="mt-4 text-xs font-bold tracking-widest bg-slate-900 text-white px-8 py-3 rounded-full hover:bg-purple-600 transition-colors active:scale-95 shadow-xl hover:shadow-purple-500/30">GET CORE</button>
-          </motion.div>
-          );
-        })}
-        {Object.keys(REG).filter(k => REG[k].d === 1 && !ins.includes(k)).length === 0 && <div className="col-span-full h-full flex flex-col items-center justify-center text-slate-500 font-medium text-lg"><Zap size={56} className="mb-6 opacity-30"/>All modules acquired!</div>}
+      <div className="flex-1 overflow-y-auto px-8 pb-10 scrollbar-hide space-y-10">
+        
+        {/* Core Modules Section */}
+        <div>
+           <h3 className="text-sm font-bold tracking-widest uppercase text-slate-400 mb-4 ml-2 mt-4">Core Modules</h3>
+           {coreUninstalled.length > 0 ? (
+              <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                 {coreUninstalled.map(id => {
+                   const Ic = REG[id].ic;
+                   return (
+                   <div key={`store-core-${id}`} className="bg-white/80 p-6 rounded-[2rem] border border-white/50 shadow-sm flex flex-col items-center justify-center text-center gap-3 hover:-translate-y-1 hover:shadow-xl transition-all">
+                     <div className={`w-16 h-16 rounded-3xl flex items-center justify-center bg-gradient-to-br ${REG[id].c} ${REG[id].t} shadow-inner drop-shadow-sm`}><Ic size={32}/></div>
+                     <span className="font-bold text-slate-800 tracking-tight">{REG[id].n}</span>
+                     <button onClick={(e)=>{if(playSound)playSound('click',e); setIns([...ins, id]);}} className="mt-2 text-[10px] font-bold tracking-widest uppercase bg-slate-900 text-white px-6 py-2.5 rounded-full hover:bg-blue-600 transition-colors active:scale-95 w-full">Install</button>
+                   </div>
+                   );
+                 })}
+              </div>
+           ) : (
+              <div className="bg-white/40 border border-slate-200/50 rounded-3xl p-6 text-center text-sm font-medium text-slate-500">All core modules installed.</div>
+           )}
+        </div>
+
+        {/* Community Modules Section */}
+        <div>
+           <h3 className="text-sm font-bold tracking-widest uppercase text-slate-400 mb-4 ml-2 flex justify-between items-center">
+             Community Hub {loading && <Loader2 size={14} className="animate-spin text-blue-500 inline ml-2"/>}
+           </h3>
+           {!loading && extApps.length === 0 && (
+              <div className="bg-white/40 border border-slate-200/50 rounded-3xl p-10 flex flex-col items-center justify-center gap-3 text-slate-500 text-center">
+                 <CloudOff size={32} className="opacity-40" />
+                 <p className="font-medium text-sm">No community modules found. Be the first to publish one!</p>
+              </div>
+           )}
+           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              {extApps.filter(a => !ins.includes(a.id)).map(a => {
+                 const IconCmp = LucideIcons[a.icon] || LucideIcons.Box;
+                 return (
+                 <div key={a.id} className="bg-white/80 p-6 rounded-[2rem] border border-white/50 shadow-sm flex flex-col items-center justify-center text-center gap-2 hover:-translate-y-1 hover:shadow-xl transition-all relative overflow-hidden group">
+                   <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-blue-500 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+                   <div className={`w-16 h-16 rounded-3xl bg-gradient-to-br ${a.img} shadow-inner mb-2 flex items-center justify-center border border-white/20`}>
+                      <IconCmp className="text-white drop-shadow-md" size={32} />
+                   </div>
+                   <h4 className="font-bold text-slate-800 tracking-tight truncate w-full px-2">{a.title}</h4>
+                   <p className="text-[9px] font-bold tracking-widest uppercase text-slate-400">By {a.dev}</p>
+                   <p className="text-xs text-slate-500 line-clamp-2 my-2">{a.desc}</p>
+                   <button onClick={()=>handleInstallExt(a)} className="mt-auto text-[10px] font-bold tracking-widest uppercase bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-2.5 rounded-full hover:brightness-110 active:scale-95 transition-all shadow-md w-full flex items-center justify-center gap-2">
+                       <Download size={12}/> Get
+                   </button>
+                 </div>
+                 );
+              })}
+           </div>
+        </div>
+
       </div>
     </div>
   );

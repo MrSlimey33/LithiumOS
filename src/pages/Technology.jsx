@@ -17,7 +17,7 @@ export default function Technology() {
       </header>
 
       <section className="max-w-7xl mx-auto px-6 md:px-12 py-20 grid grid-cols-1 md:grid-cols-2 gap-10">
-         <motion.div initial={{opacity:0, y:50}} whileInView={{opacity:1, y:0}} viewport={{once:true}} transition={{duration:0.8}} className="bg-[#0a0f18] rounded-[3rem] p-10 border border-[#1e2330] relative overflow-hidden group">
+         <motion.div initial={{opacity:0, y:50}} whileInView={{opacity:1, y:0}} viewport={{once:true}} transition={{duration:0.8}} className="glass-dark rounded-[2.5rem] p-10 border border-white/10 relative overflow-hidden group">
             <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] group-hover:bg-cyan-500/20 transition-colors" />
             <Globe className="text-cyan-400 mb-8" size={48} />
             <h2 className="text-4xl font-bold tracking-tight text-white mb-4">Lithium Glass</h2>
@@ -25,7 +25,7 @@ export default function Technology() {
             <div className="text-xs font-bold tracking-widest text-cyan-500 uppercase px-4 py-2 border border-cyan-500/30 rounded-full inline-block">Estimated R&D 2028</div>
          </motion.div>
 
-         <motion.div initial={{opacity:0, y:50}} whileInView={{opacity:1, y:0}} viewport={{once:true}} transition={{duration:0.8, delay:0.2}} className="bg-[#0a0f18] rounded-[3rem] p-10 border border-[#1e2330] relative overflow-hidden group">
+         <motion.div initial={{opacity:0, y:50}} whileInView={{opacity:1, y:0}} viewport={{once:true}} transition={{duration:0.8, delay:0.2}} className="glass-dark rounded-[2.5rem] p-10 border border-white/10 relative overflow-hidden group">
             <div className="absolute bottom-0 right-0 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-[80px] group-hover:bg-fuchsia-500/20 transition-colors" />
             <Zap className="text-fuchsia-400 mb-8" size={48} />
             <h2 className="text-4xl font-bold tracking-tight text-white mb-4">Lithium Quant</h2>
@@ -33,7 +33,7 @@ export default function Technology() {
             <div className="text-xs font-bold tracking-widest text-fuchsia-500 uppercase px-4 py-2 border border-fuchsia-500/30 rounded-full inline-block">Estimated R&D 2029</div>
          </motion.div>
 
-         <motion.div initial={{opacity:0, y:50}} whileInView={{opacity:1, y:0}} viewport={{once:true}} transition={{duration:0.8, delay:0.4}} className="bg-[#0a0f18] rounded-[3rem] p-10 border border-[#1e2330] relative overflow-hidden group col-span-1 md:col-span-2 text-center md:text-left md:flex items-center gap-10">
+         <motion.div initial={{opacity:0, y:50}} whileInView={{opacity:1, y:0}} viewport={{once:true}} transition={{duration:0.8, delay:0.4}} className="glass-dark rounded-[2.5rem] p-10 border border-white/10 relative overflow-hidden group col-span-1 md:col-span-2 text-center md:text-left md:flex items-center gap-10">
             <div className="w-full md:w-1/3 aspect-square bg-[#151a25] rounded-[2rem] border border-[#2a2f3a] flex items-center justify-center shadow-inner mb-6 md:mb-0 relative overflow-hidden">
                <Cpu className="text-rose-500" size={64}/>
                <div className="absolute inset-0 bg-rose-500/10 mix-blend-overlay animate-pulse" />

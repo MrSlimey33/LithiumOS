@@ -13,10 +13,12 @@ import Merch from './pages/Merch';
 import Jobs from './pages/Jobs';
 import Manifesto from './pages/Manifesto';
 import Concepts from './pages/Concepts';
+import Developers from './pages/Developers';
 
 const NAV_LINKS = [
   { to: '/technology', label: 'Technology' },
   { to: '/marketplace', label: 'Marketplace' },
+  { to: '/developers', label: 'Developers' },
   { to: '/merch', label: 'Merch' },
   { to: '/jobs', label: 'Careers' },
   { to: '/manifesto', label: 'Manifesto' },
@@ -137,6 +139,7 @@ export default function App() {
       <Route path="/jobs" element={<PageTransition><Jobs /></PageTransition>} />
       <Route path="/manifesto" element={<PageTransition><Manifesto /></PageTransition>} />
       <Route path="/concepts" element={<PageTransition><Concepts /></PageTransition>} />
+      <Route path="/developers" element={<PageTransition><Developers /></PageTransition>} />
     </Routes>
   );
 }

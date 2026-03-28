@@ -1,6 +1,7 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useMotionValue, useTransform, useSpring } from 'framer-motion';
 import { Calculator, FileText, Settings, Store, CloudSun, Camera, Wifi, Battery, Search, Lock, Mic, Image as ImageIcon, Clock, Music, Terminal, Shield, Activity, LocateFixed, Globe, Palette, LogOut, ChevronLeft, X, Minus, Maximize2, Zap, Code2, Signal, Plus, Plane, Moon, Folder } from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 // Import All Apps
@@ -63,10 +64,10 @@ function useVDisk(key, init) {
 }
 
 // ===== ENHANCED WINDOW COMPONENT =====
-function Window({ w, focus, close, min, max, children, constraintsRef }) {
+function Window({ w, focus, close, min, max, children, constraintsRef, activeReg }) {
   if (w.min) return null;
   const Ic = w.ic;
-  const reg = REG[w.id];
+  const reg = activeReg[w.id] || { n: 'Unknown' };
   
   return (
     <motion.div 
@@ -232,6 +233,35 @@ export default function LithiumOS({ previewMode = false }) {
   const mouseX = useMotionValue(Infinity);
   const [showControlCenter, setShowControlCenter] = useState(false);
   
+  const [extAppsMap, setExtAppsMap] = useState(() => {
+     try { return JSON.parse(window.localStorage.getItem('LITHIUM_ext_apps') || '{}'); } catch(e) { return {}; }
+  });
+
+  useEffect(() => {
+     const handleStorage = () => {
+        try { setExtAppsMap(JSON.parse(window.localStorage.getItem('LITHIUM_ext_apps') || '{}')); } catch(e){}
+     };
+     window.addEventListener('storage', handleStorage);
+     const interval = setInterval(handleStorage, 2000);
+     return () => { window.removeEventListener('storage', handleStorage); clearInterval(interval); };
+  }, []);
+
+  const activeReg = useMemo(() => {
+      const merged = { ...REG };
+      for (const [id, extApp] of Object.entries(extAppsMap)) {
+         merged[id] = {
+            n: extApp.title,
+            ic: LucideIcons[extApp.icon] || LucideIcons.Box,
+            c: extApp.img,
+            t: 'text-white',
+            d: 1,
+            comp: () => <iframe src={extApp.url} title={extApp.title} className="w-full h-full border-none bg-slate-900" sandbox="allow-scripts allow-same-origin allow-forms"/>,
+            menus: ['Module', 'Navigate', 'View', 'Refresh']
+         };
+      }
+      return merged;
+  }, [extAppsMap]);
+
   const wallpapers = [
      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
      'https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=2564&auto=format&fit=crop',
@@ -266,19 +296,20 @@ export default function LithiumOS({ previewMode = false }) {
       const startX = Math.max(0, (window.innerWidth - wWidth) / 2 + ws.length * 20);
       const startY = Math.max(30, (window.innerHeight - wHeight) / 2 + ws.length * 20 - 40);
 
-      return [...ws, { id, ic: REG[id].ic, z: Date.now(), min: false, max: false, x: startX, y: startY, w: wWidth, h: wHeight }];
+      const appData = activeReg[id] || REG[id] || {};
+      return [...ws, { id, ic: appData.ic || LucideIcons.Box, z: Date.now(), min: false, max: false, x: startX, y: startY, w: wWidth, h: wHeight }];
     });
     setStartOpen(false);
-  }, [isMobile]);
+  }, [isMobile, activeReg]);
   
   const closeApp = (id) => setWins(ws => ws.filter(w => w.id !== id));
   const minApp = (id) => setWins(ws => ws.map(w => w.id === id ? { ...w, min: true } : w));
   const maxApp = (id) => setWins(ws => ws.map(w => w.id === id ? { ...w, max: !w.max, x: w.max ? w.x : 0, y: w.max ? w.y : 28 } : w));
 
   const renderCurrentApp = (id) => {
-    const AppComp = REG[id]?.comp;
+    const AppComp = activeReg[id]?.comp;
     if (!AppComp) return <div className="p-8 text-center bg-white/50 w-full h-full text-slate-500">Module failed to load.</div>
-    return <AppComp playSound={playSound} useVDisk={useVDisk} audioCtx={getAudioCtx()} ins={apps} setIns={setApps} un={(i) => setApps(apps.filter(x=>x!==i))} lock={()=>{setLocked(true);setWins([]); setActiveMobileApp(null)}} REG={REG} openDevStudio={()=>launchApp('devstudio', null)} />;
+    return <AppComp playSound={playSound} useVDisk={useVDisk} audioCtx={getAudioCtx()} ins={apps} setIns={setApps} un={(i) => setApps(apps.filter(x=>x!==i))} lock={()=>{setLocked(true);setWins([]); setActiveMobileApp(null)}} REG={activeReg} openDevStudio={()=>launchApp('devstudio', null)} />;
   };
 
   const handleLogout = () => {
@@ -293,8 +324,8 @@ export default function LithiumOS({ previewMode = false }) {
   }, []);
 
   const activeWindow = wins.length > 0 && !wins[wins.length-1].min ? wins[wins.length-1] : null;
-  const activeMenus = activeWindow ? REG[activeWindow.id].menus : ['File', 'Edit', 'View', 'Go', 'Window', 'Help'];
-  const appName = activeWindow ? REG[activeWindow.id].n : 'Finder';
+  const activeMenus = activeWindow && activeReg[activeWindow.id] ? activeReg[activeWindow.id].menus : ['File', 'Edit', 'View', 'Go', 'Window', 'Help'];
+  const appName = activeWindow && activeReg[activeWindow.id] ? activeReg[activeWindow.id].n : 'Finder';
 
   // ------------------- MOBILE RENDER -------------------
   if (isMobile && !previewMode) {
@@ -322,7 +353,7 @@ export default function LithiumOS({ previewMode = false }) {
               <motion.div key="app-layer" initial={{ x: '100%', filter: 'brightness(1.5)' }} animate={{ x: 0, filter: 'brightness(1)' }} exit={{ x: '100%', opacity: 0 }} transition={{ type: "spring", damping: 28, stiffness: 220, mass: 1 }} className="absolute inset-x-0 bottom-0 top-0 z-[150] bg-white flex flex-col shadow-2xl overflow-hidden">
                  <div className="h-14 bg-white/95 backdrop-blur-xl border-b border-slate-100 flex items-center justify-between px-4 z-50 shrink-0 safe-top">
                     <button onClick={() => setActiveMobileApp(null)} className="flex items-center gap-0.5 text-blue-600 font-bold active:bg-blue-50 px-3 py-1.5 rounded-2xl transition-colors"><ChevronLeft size={22}/> Back</button>
-                    <span className="font-extrabold text-slate-900 text-[15px] tracking-tight">{REG[activeMobileApp].n}</span>
+                    <span className="font-extrabold text-slate-900 text-[15px] tracking-tight">{activeReg[activeMobileApp]?.n || 'App'}</span>
                     <button className="w-10 h-10 flex items-center justify-center text-slate-400 hover:text-slate-900" onClick={() => setActiveMobileApp(null)}><X size={20}/></button>
                  </div>
                  <div className="flex-1 overflow-hidden bg-slate-50 relative">{renderCurrentApp(activeMobileApp)}</div>
@@ -369,8 +400,10 @@ export default function LithiumOS({ previewMode = false }) {
                 </div>
 
                 <div className="grid grid-cols-4 gap-y-8 gap-x-4 mb-32">
-                   {Object.keys(REG).map(id => {
-                      const a = REG[id]; const Ic = a.ic;
+                   {apps.map(id => {
+                      const a = activeReg[id];
+                      if (!a) return null;
+                      const Ic = a.ic || LucideIcons.Box;
                       return (
                          <motion.div whileTap={{ scale: 0.9 }} key={id} className="flex flex-col items-center gap-2 group" onClick={(e) => launchApp(id, e)}>
                             <div className={`w-16 h-16 rounded-[1.6rem] flex items-center justify-center bg-gradient-to-br ${a.c} ${a.t} shadow-[0_12px_24px_rgba(0,0,0,0.4),inset_0_2px_10px_rgba(255,255,255,0.25)] border border-white/20 relative group-active:brightness-110 transition-all`}>
@@ -386,7 +419,9 @@ export default function LithiumOS({ previewMode = false }) {
                 {/* MOBILE DOCK */}
                 <div className="fixed bottom-8 left-6 right-6 h-24 glass rounded-[3rem] flex items-center justify-around px-4 shadow-[0_20px_50px_rgba(0,0,0,0.5)] z-[100] border-white/30 backdrop-blur-3xl">
                    {['browser', 'notes', 'terminal', 'vault'].map(id => {
-                      const a = REG[id]; const Ic = a.ic;
+                      const a = activeReg[id];
+                      if(!a) return null;
+                      const Ic = a.ic;
                       return (
                         <motion.div whileTap={{ scale: 0.85, y: -8 }} key={`dock-${id}`} className={`w-16 h-16 rounded-[1.4rem] flex items-center justify-center bg-gradient-to-br ${a.c} ${a.t} shadow-xl border border-white/30 transition-transform`} onClick={(e) => launchApp(id, e)}>
                            <Ic size={28} className="drop-shadow-md" />
@@ -548,7 +583,7 @@ export default function LithiumOS({ previewMode = false }) {
         {/* DESKTOP ICONS */}
         <div className="absolute top-6 right-6 flex flex-col gap-6 z-0 items-end">
            {apps.slice(0, 4).map(id => {
-             const a = REG[id]; if (!a) return null; const Ic = a.ic;
+             const a = activeReg[id]; if (!a) return null; const Ic = a.ic;
              return (
                <motion.div drag dragMomentum={false} initial={{opacity:0, x:20}} animate={{opacity:1, x:0}} key={`desktop-${id}`} className="flex flex-col items-center gap-1.5 cursor-pointer w-20 group relative" onDoubleClick={(e)=>launchApp(id, e)}>
                   <div 
@@ -571,7 +606,7 @@ export default function LithiumOS({ previewMode = false }) {
         {/* WINDOWS */}
         <AnimatePresence>
            {!locked && wins.map(w => (
-             <Window key={w.id} w={w} focus={focusApp} close={closeApp} min={minApp} max={maxApp} constraintsRef={containerRef}>
+             <Window key={w.id} w={w} focus={focusApp} close={closeApp} min={minApp} max={maxApp} constraintsRef={containerRef} activeReg={activeReg}>
                {renderCurrentApp(w.id)}
              </Window>
            ))}
@@ -613,8 +648,9 @@ export default function LithiumOS({ previewMode = false }) {
                 <Search size={26} className="text-slate-700" />
                 <div className="absolute -top-10 opacity-0 group-hover:opacity-100 bg-[#1a1a2e]/95 text-white text-[10px] px-2.5 py-1 rounded-md font-semibold transition-opacity pointer-events-none whitespace-nowrap" style={{ backdropFilter: 'blur(12px)', boxShadow: '0 4px 12px rgba(0,0,0,0.3)' }}>Launchpad</div>
              </motion.button>              <div className="w-[0.5px] h-10 bg-black/10 mx-1 rounded-full self-center"/>
-              {['browser', 'notes', 'files', 'music', 'terminal', 'vault', 'calc', 'devstudio', 'settings'].map((id) => {
-                const a = REG[id]; 
+              {apps.slice(0, 8).map((id) => {
+                const a = activeReg[id]; 
+                if (!a) return null;
                 const isOpen = wins.find(w=>w.id===id && !w.min);
                 return (
                   <DockItem 
@@ -659,8 +695,8 @@ export default function LithiumOS({ previewMode = false }) {
                     <Search className="absolute left-[8%] top-1/2 -translate-y-1/2 text-white/40" size={26}/>
                  </div>
                  <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.1 }} className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-y-10 gap-x-6 max-w-5xl w-full pb-20">
-                    {Object.keys(REG).filter(x => REG[x].n.toLowerCase().includes(q.toLowerCase())).map((id) => {
-                      const app = REG[id]; const Ic = app.ic;
+                    {Object.keys(activeReg).filter(x => activeReg[x].n.toLowerCase().includes(q.toLowerCase())).map((id) => {
+                      const app = activeReg[id]; const Ic = app.ic || LucideIcons.Box;
                       return (
                         <div key={`launch-${id}`} className="cursor-pointer group flex flex-col items-center gap-3" onClick={(e) => launchApp(id, e)}>
                           <div 
