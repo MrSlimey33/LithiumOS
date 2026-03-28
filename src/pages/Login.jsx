@@ -42,11 +42,21 @@ export default function Login() {
          vault.push({ email, payload: encryptedPayload });
          
          // Save encrypted vault to GitHub repo
-         await saveVault(vault);
+         const syncResult = await saveVault(vault);
          
-         setStatus('success');
-         setMsg('Identity forged. Switching to login...');
-         setTimeout(() => setMode('login'), 2000);
+         if (syncResult === 'local') {
+            setStatus('success');
+            setMsg('Identity forged (Local Only - Sync Failed).');
+         } else {
+            setStatus('success');
+            setMsg('Identity forged. Switching to login...');
+         }
+         
+         setTimeout(() => {
+            setMode('login');
+            setStatus('idle');
+            setMsg('');
+         }, 3000);
          return;
       }
 
@@ -125,7 +135,7 @@ export default function Login() {
 
            <AnimatePresence>
              {status !== 'idle' && (
-               <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} exit={{opacity:0}} className={`mt-6 md:mt-8 text-xs font-bold tracking-widest uppercase text-center flex items-center justify-center gap-2 ${status==='error'?'text-rose-500':status==='success'?'text-emerald-400':'text-blue-400'}`}>
+               <motion.div initial={{opacity:0, y:10}} animate={{opacity:1, y:0}} exit={{opacity:0}} className={`mt-6 md:mt-8 text-xs font-bold tracking-widest uppercase text-center flex items-center justify-center gap-2 ${status==='error'?'text-rose-500':status==='success' && msg.includes('Local') ? 'text-amber-500' : status==='success'?'text-emerald-400':'text-blue-400'}`}>
                   {status === 'error' && <AlertCircle size={14} />}
                   {status === 'success' && <CheckCircle2 size={14} />}
                   {status === 'loading' && <Loader size={14} className="animate-spin" />}
