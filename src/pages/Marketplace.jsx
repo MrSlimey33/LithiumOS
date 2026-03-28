@@ -10,7 +10,7 @@ export default function Marketplace() {
   const id = window.localStorage.getItem('LITHIUM_CLOUD_ID');
 
   useEffect(() => {
-    fetch('https://api.github.com/repos/MrSlimey33/LithiumOS/issues?labels=marketplace&state=open')
+    fetch('https://api.github.com/repos/MrSlimey33/LithiumOS/issues?state=open&per_page=100')
       .then(res => res.json())
       .then(data => {
         const parsedApps = [];
@@ -21,7 +21,7 @@ export default function Marketplace() {
              if (jsonMatch && jsonMatch[1]) {
                 const appData = JSON.parse(jsonMatch[1]);
                 // Validate app
-                if (appData.name && appData.url) {
+                if (appData.name && appData.code) {
                    parsedApps.push({
                       id: `ext_${issue.id}`,
                       title: appData.name,
@@ -29,7 +29,7 @@ export default function Marketplace() {
                       icon: appData.icon || 'Box',
                       img: appData.color || 'from-slate-700 to-slate-900',
                       desc: appData.description || 'No description provided.',
-                      url: appData.url,
+                      code: appData.code,
                       issueUrl: issue.html_url
                    });
                 }
@@ -111,6 +111,9 @@ export default function Marketplace() {
                          </div>
                          <h3 className="text-xl font-bold text-white mb-2">{a.title}</h3>
                          <p className="text-xs font-bold tracking-widest uppercase text-slate-500 mb-4">{a.dev}</p>
+                         <div className="flex items-center gap-2 text-indigo-400 font-bold text-[10px] tracking-widest uppercase mb-4">
+                            <Zap size={14} /> Native code execution
+                         </div>
                          <p className="text-sm text-slate-400 line-clamp-2">{a.desc}</p>
                       </motion.div>
                    );

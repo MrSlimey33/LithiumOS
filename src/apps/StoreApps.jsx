@@ -8,7 +8,7 @@ export function StoreApp({ ins, setIns, REG, playSound, openDevStudio }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch('https://api.github.com/repos/MrSlimey33/LithiumOS/issues?labels=marketplace&state=open')
+    fetch('https://api.github.com/repos/MrSlimey33/LithiumOS/issues?state=open&per_page=100')
       .then(res => res.json())
       .then(data => {
         const parsedApps = [];
@@ -18,7 +18,7 @@ export function StoreApp({ ins, setIns, REG, playSound, openDevStudio }) {
              const jsonMatch = body.match(/```json\n([\s\S]*?)\n```/);
              if (jsonMatch && jsonMatch[1]) {
                 const appData = JSON.parse(jsonMatch[1]);
-                if (appData.name && appData.url) {
+                if (appData.name && appData.code) {
                    parsedApps.push({
                       id: `ext_${issue.id}`,
                       title: appData.name,
@@ -26,7 +26,7 @@ export function StoreApp({ ins, setIns, REG, playSound, openDevStudio }) {
                       icon: appData.icon || 'Box',
                       img: appData.color || 'from-slate-700 to-slate-900',
                       desc: appData.description || 'No description provided.',
-                      url: appData.url
+                      code: appData.code
                    });
                 }
              }

@@ -255,8 +255,8 @@ export default function LithiumOS({ previewMode = false }) {
             c: extApp.img,
             t: 'text-white',
             d: 1,
-            comp: () => <iframe src={extApp.url} title={extApp.title} className="w-full h-full border-none bg-slate-900" sandbox="allow-scripts allow-same-origin allow-forms"/>,
-            menus: ['Module', 'Navigate', 'View', 'Refresh']
+            comp: () => <iframe srcDoc={extApp.code} title={extApp.title} className="w-full h-full border-none bg-white" sandbox="allow-scripts allow-modals allow-forms allow-popups"/>,
+            menus: ['Node', 'Navigate', 'View', 'Refresh']
          };
       }
       return merged;

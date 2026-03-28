@@ -8,7 +8,7 @@ export default function Developers() {
   const [developer, setDeveloper] = useState('');
   const [icon, setIcon] = useState('Gamepad2');
   const [color, setColor] = useState('from-indigo-500 to-purple-600');
-  const [url, setUrl] = useState('');
+  const [code, setCode] = useState('<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body { font-family: sans-serif; display: flex; align-items: center; justify-content: center; height: 100vh; margin: 0; background: #0f172a; color: white; }\n    .card { background: rgba(255,255,255,0.05); padding: 2rem; border-radius: 2rem; border: 1px solid rgba(255,255,255,0.1); text-align: center; }\n    h1 { margin: 0 0 0.5rem 0; color: #38bdf8; }\n  </style>\n</head>\n<body>\n  <div class="card">\n    <h1>Hello Lithium!</h1>\n    <p>Your native node app is running.</p>\n  </div>\n</body>\n</html>');
   const [description, setDescription] = useState('');
 
   const handlePublish = (e) => {
@@ -20,7 +20,7 @@ export default function Developers() {
       developer: developer || 'Anonymous',
       icon: icon || 'AppWindow',
       color: color,
-      url: url,
+      code: code,
       description: description
     };
 
@@ -42,7 +42,7 @@ export default function Developers() {
          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[600px] bg-gradient-to-br from-indigo-600/20 to-blue-900/30 rounded-full blur-[100px] -z-10" />
          
          <motion.div initial={{scale:0.8, opacity:0}} animate={{scale:1, opacity:1}} className="mb-6 px-4 py-1.5 glass rounded-full text-indigo-400 font-bold text-xs tracking-widest uppercase">
-            Lithium WebModules™
+            Lithium Node Apps™
          </motion.div>
 
          <motion.h1 initial={{y:30, opacity:0}} animate={{y:0, opacity:1}} transition={{duration:1, delay:0.2}} className="text-5xl md:text-7xl font-bold tracking-tighter mb-6 text-white text-glow">Build The Future.</motion.h1>
@@ -55,10 +55,10 @@ export default function Developers() {
              <div className="glass-dark p-8 rounded-[2rem] border border-white/10">
                 <div className="w-12 h-12 bg-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center mb-6"><Code2 size={24}/></div>
                 <h3 className="text-2xl font-bold text-white mb-4">Zero-Code Publishing</h3>
-                <p className="text-slate-400 leading-relaxed mb-6">Lithium applications are "WebModules" — glorified iframes perfectly sandboxed into the beautiful spatial window manager. You build your app using HTML/JS, host it on GitHub Pages, Vercel, or anywhere you like, and simply provide the URL here.</p>
+                <p className="text-slate-400 leading-relaxed mb-6">Lithium applications are "Node Apps" — natively hosted HTML/JS blocks perfectly sandboxed into the beautiful spatial window manager. You write your app's logic directly into the manifest, and LithiumOS executes it instantly at runtime.</p>
                 <div className="p-4 bg-slate-900 rounded-xl border border-slate-800 font-mono text-xs text-blue-300">
-                   <span className="text-slate-500">// Your App is literally just this:</span><br/>
-                   &lt;iframe src="YOUR_URL" className="w-full h-full" /&gt;
+                   <span className="text-slate-500">// Your App is the actual source:</span><br/>
+                   &lt;html&gt;...YOUR_CODE...&lt;/html&gt;
                 </div>
              </div>
 
@@ -85,8 +85,8 @@ export default function Developers() {
                    <input required value={developer} onChange={e=>setDeveloper(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-600 outline-none focus:border-blue-500/50 transition-colors" placeholder="xXx_hacker_17_xXx" />
                 </div>
                 <div>
-                   <label className="text-[10px] font-bold tracking-widest uppercase text-slate-500 block mb-2">Hosted URL (Iframe Source)</label>
-                   <input required type="url" value={url} onChange={e=>setUrl(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-600 outline-none focus:border-blue-500/50 transition-colors font-mono text-sm" placeholder="https://..." />
+                   <label className="text-[10px] font-bold tracking-widest uppercase text-slate-500 block mb-2">Native Source Code (HTML/CSS/JS)</label>
+                   <textarea required value={code} onChange={e=>setCode(e.target.value)} className="w-full bg-slate-900 border border-slate-800 rounded-xl py-3 px-4 text-white placeholder-slate-600 outline-none focus:border-blue-500/50 transition-colors font-mono text-xs h-64 scrollbar-hide" placeholder="<html>...</html>" />
                 </div>
                 <div>
                    <label className="text-[10px] font-bold tracking-widest uppercase text-slate-500 block mb-2">Lucide Icon Name</label>
