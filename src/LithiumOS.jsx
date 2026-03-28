@@ -230,6 +230,7 @@ export default function LithiumOS({ previewMode = false }) {
   const containerRef = useRef(null);
   const [wallpaperIdx] = useState(Math.floor(Math.random() * 3));
   const mouseX = useMotionValue(Infinity);
+  const [showControlCenter, setShowControlCenter] = useState(false);
   
   const wallpapers = [
      'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?q=80&w=2564&auto=format&fit=crop',
@@ -297,8 +298,6 @@ export default function LithiumOS({ previewMode = false }) {
 
   // ------------------- MOBILE RENDER -------------------
   if (isMobile && !previewMode) {
-    const [showControlCenter, setShowControlCenter] = useState(false);
-
     return (
        <div className="absolute inset-0 bg-[#0c0c0e] overflow-hidden font-sans text-slate-100 select-none flex flex-col no-tap-highlight" style={{ backgroundImage: `url(${wallpapers[wallpaperIdx]})`, backgroundSize: 'cover', backgroundPosition: 'center' }}>
           <div className="absolute inset-0 backdrop-blur-md bg-black/40" />

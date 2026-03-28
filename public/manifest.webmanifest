@@ -1,13 +1,13 @@
 {
   "name": "LithiumOS",
   "short_name": "Lithium",
-  "start_url": "/station",
+  "start_url": "./#/station",
   "display": "standalone",
   "background_color": "#0f172a",
   "theme_color": "#0f172a",
   "icons": [
     {
-      "src": "/favicon.svg",
+      "src": "./favicon.svg",
       "sizes": "any",
       "type": "image/svg+xml",
       "purpose": "any maskable"
