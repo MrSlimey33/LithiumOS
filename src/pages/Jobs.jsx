@@ -1,65 +1,52 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { Coffee, Trash, Code, Briefcase, Frown, ShoppingBag } from 'lucide-react';
+import { Shield, Sparkles, UserCheck, Search, Activity, Cpu } from 'lucide-react';
 
-export function Jobs() {
-  const [applied, setApplied] = useState(false);
-  
+export default function Jobs() {
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200">
-      <header className="py-20 text-center px-4">
-         <motion.h1 initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} className="text-5xl font-bold tracking-tighter mb-4 text-white">Careers at Lithium</motion.h1>
-         <p className="text-xl text-slate-400 font-light max-w-2xl mx-auto">Work for a 17-year-old. Get paid in exposure. Maybe.</p>
-      </header>
+    <div className="min-h-screen bg-q-void text-white pt-40 pb-32 px-6 relative overflow-hidden">
+      <div className="absolute top-0 left-0 w-full h-full spatial-mesh opacity-10 pointer-events-none" />
+      <div className="absolute -top-40 -left-40 w-96 h-96 bg-rose-500/10 blur-[140px] rounded-full group animate-pulse-glow" />
       
-      <div className="max-w-4xl mx-auto px-6 grid grid-cols-1 gap-6 pb-20">
-         <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-[2rem] flex items-center justify-between group">
-            <div className="flex items-center gap-6">
-               <div className="w-16 h-16 bg-fuchsia-500/20 text-fuchsia-400 rounded-2xl flex items-center justify-center group-hover:bg-fuchsia-500 group-hover:text-white transition-colors"><Code size={32}/></div>
-               <div>
-                  <h3 className="text-xl font-bold text-white">Senior Lead Prompt Engineer</h3>
-                  <p className="text-slate-400 mt-1">Requirements: Copy-paste stack overflow into ChatGPT.</p>
+      <div className="max-w-4xl mx-auto relative z-10 text-center">
+         <motion.div 
+           initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}
+           className="w-24 h-24 bg-rose-500/10 text-rose-500 rounded-[2rem] flex items-center justify-center mb-12 mx-auto border border-rose-500/20 shadow-2xl"
+         >
+            <Shield size={48} />
+         </motion.div>
+
+         <h1 className="text-7xl md:text-9xl font-black text-white tracking-tighter leading-[0.8] mb-10 italic uppercase shimmer-text">
+            UNAVAILABLE_
+         </h1>
+         <p className="text-xl md:text-2xl text-q-text-secondary mb-20 max-w-2xl mx-auto leading-relaxed italic">
+            "The architecture and infrastructure of Lithium is currently being maintained by a single-node founder protocol."
+         </p>
+
+         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 text-left">
+            <div className="q-glass rounded-[3rem] p-10 border-white/5 relative overflow-hidden group">
+               <div className="flex items-center gap-4 mb-6">
+                  <Activity size={20} className="text-cyan-400" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/20">Operational Status</span>
                </div>
+               <h3 className="text-2xl font-black mb-4 italic text-white uppercase italic">Zero Growth Policy</h3>
+               <p className="text-sm text-q-text-secondary leading-relaxed font-medium">I'm currently not hiring humans. Code is faster than consensus, and Lithium thrives on individual sovereignty.</p>
             </div>
-            <button onClick={()=>setApplied(true)} className="px-6 py-3 bg-white text-slate-900 font-bold rounded-full hover:scale-105 active:scale-95 transition-transform">Apply ($0/hr)</button>
+
+            <div className="q-glass rounded-[3rem] p-10 border-white/5 relative overflow-hidden group">
+               <div className="flex items-center gap-4 mb-6">
+                  <Cpu size={20} className="text-violet-400" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white/20">Next Synchronization</span>
+               </div>
+               <h3 className="text-2xl font-black mb-4 italic text-white uppercase italic">Future Horizon: 2027</h3>
+               <p className="text-sm text-q-text-secondary leading-relaxed font-medium">When the network matures and the browser-kernel scales, I may consider peer nodes for low-level development.</p>
+            </div>
          </div>
 
-         <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-[2rem] flex items-center justify-between group">
-            <div className="flex items-center gap-6">
-               <div className="w-16 h-16 bg-blue-500/20 text-blue-400 rounded-2xl flex items-center justify-center group-hover:bg-blue-500 group-hover:text-white transition-colors"><Coffee size={32}/></div>
-               <div>
-                  <h3 className="text-xl font-bold text-white">Executive Coffee Fetcher</h3>
-                  <p className="text-slate-400 mt-1">Requirements: I code late. Bring me espresso. Do not look me in the eye.</p>
-               </div>
-            </div>
-            <button onClick={()=>setApplied(true)} className="px-6 py-3 bg-white text-slate-900 font-bold rounded-full hover:scale-105 active:scale-95 transition-transform">Apply ($0/hr)</button>
-         </div>
-
-         <div className="bg-slate-800/50 border border-slate-700 p-8 rounded-[2rem] flex items-center justify-between group">
-            <div className="flex items-center gap-6">
-               <div className="w-16 h-16 bg-rose-500/20 text-rose-400 rounded-2xl flex items-center justify-center group-hover:bg-rose-500 group-hover:text-white transition-colors"><Trash size={32}/></div>
-               <div>
-                  <h3 className="text-xl font-bold text-white">Vice President of Deleteing console.logs</h3>
-                  <p className="text-slate-400 mt-1">Requirements: Can you type CMD+F? You're hired.</p>
-               </div>
-            </div>
-            <button onClick={()=>setApplied(true)} className="px-6 py-3 bg-white text-slate-900 font-bold rounded-full hover:scale-105 active:scale-95 transition-transform">Apply ($0/hr)</button>
+         <div className="mt-40 pt-20 border-t border-white/5 opacity-40">
+            <p className="text-[10px] font-black tracking-[0.5em] uppercase mb-4 italic">Work with Lithium // 0 Positions Open</p>
          </div>
       </div>
-      
-      {applied && (
-        <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 flex items-center justify-center p-6">
-           <motion.div initial={{scale:0.9, opacity:0}} animate={{scale:1, opacity:1}} className="bg-slate-800 border border-slate-600 p-10 rounded-[2.5rem] text-center max-w-sm">
-              <Frown size={48} className="text-slate-400 mx-auto mb-6" />
-              <h2 className="text-2xl font-bold text-white mb-2">Application Rejected</h2>
-              <p className="text-slate-300 mb-8">You are over-qualified. Also, I don't actually have payroll set up.</p>
-              <button onClick={()=>setApplied(false)} className="w-full bg-blue-600 py-4 rounded-xl text-white font-bold hover:bg-blue-500">Okay then</button>
-           </motion.div>
-        </div>
-      )}
-
     </div>
-  )
+  );
 }
-
-export default Jobs;

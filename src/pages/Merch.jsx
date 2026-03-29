@@ -1,49 +1,108 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingBag, AlertTriangle } from 'lucide-react';
+import { ShoppingBag, Zap, Sparkles, ArrowUpRight, Shield, Layers } from 'lucide-react';
+
+const MerchCard = ({ title, price, color, delay }) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ delay, duration: 0.6 }}
+    className="group cursor-pointer"
+  >
+    <div className="aspect-[4/5] q-glass rounded-[3rem] mb-8 overflow-hidden border-white/5 relative shadow-2xl">
+       <div className="absolute inset-0 spatial-mesh opacity-20" />
+       <div className={`w-full h-full bg-gradient-to-br ${color} opacity-10 group-hover:opacity-30 transition-all duration-700 group-hover:scale-110`} />
+       <div className="absolute inset-0 flex items-center justify-center">
+          <Layers size={120} className="text-white opacity-5 group-hover:opacity-20 transition-all duration-700 group-hover:rotate-12" />
+       </div>
+       <div className="absolute bottom-10 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-all duration-500 transform translate-y-4 group-hover:translate-y-0">
+          <button className="bg-white text-black px-8 py-3 rounded-2xl font-black text-[10px] uppercase tracking-widest flex items-center gap-2 shadow-2xl">
+             Reserve Node <ArrowUpRight size={14}/>
+          </button>
+       </div>
+    </div>
+    <div className="flex justify-between items-end px-4">
+       <div>
+          <h3 className="text-2xl font-black text-white tracking-tighter italic uppercase">{title}</h3>
+          <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.4em] mt-2 italic">Official Lithium Artifact</p>
+       </div>
+       <div className="text-right">
+          <span className="text-xl font-mono font-black text-cyan-400 italic">${price}</span>
+       </div>
+    </div>
+  </motion.div>
+);
 
 export default function Merch() {
-  const [error, setError] = useState('');
-  
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200">
-      <header className="py-20 text-center px-4">
-         <motion.h1 initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} className="text-5xl font-bold tracking-tighter mb-4 text-white">Lithium Drip</motion.h1>
-         <p className="text-xl text-slate-400 font-light max-w-2xl mx-auto">Fund my college tuition by buying literal overpriced concept art.</p>
-      </header>
-
-      {error && (
-         <div className="max-w-md mx-auto mb-10 bg-rose-500/20 text-rose-400 border border-rose-500/50 p-4 rounded-xl flex items-center gap-4 animate-bounce">
-            <AlertTriangle />
-            <span className="font-bold">{error}</span>
-         </div>
-      )}
+    <div className="min-h-screen bg-q-void text-white pt-40 pb-32 px-6 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-full h-full spatial-mesh opacity-10 pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[60vw] h-[60vh] bg-cyan-500/5 blur-[160px] rounded-full pointer-events-none" />
       
-      <div className="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8 pb-20">
-         <div className="bg-slate-800 border border-slate-700 rounded-[2rem] p-6 text-center">
-            <div className="w-full aspect-square bg-slate-700 rounded-[1.5rem] mb-6 flex items-center justify-center break-all p-4 text-white font-black text-6xl">LITHIUM WATER</div>
-            <h3 className="text-2xl font-bold text-white mb-2">Lithium Water Bottle</h3>
-            <p className="text-slate-400 mb-4">$5,000.00 USD</p>
-            <p className="text-sm text-slate-500 mb-6 px-4">It's a plastic bottle. I wrote 'Lithium' on it with a Sharpie. Free shipping.</p>
-            <button onClick={()=>setError("Credit card declined. It's a sign. Don't buy this.")} className="w-full py-4 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-200">Add to Cart</button>
-         </div>
+      <div className="max-w-7xl mx-auto relative z-10">
+        <div className="flex flex-col md:flex-row justify-between items-end gap-12 mb-32">
+           <div className="max-w-2xl">
+              <motion.div
+                 initial={{ opacity: 0, x: -20 }}
+                 animate={{ opacity: 1, x: 0 }}
+                 className="inline-flex items-center gap-2 text-cyan-400 mb-6 font-black text-[10px] uppercase tracking-[0.4em]"
+              >
+                 <ShoppingBag size={16} /> The Armory
+              </motion.div>
+              <h1 className="text-7xl md:text-9xl font-black text-white tracking-tighter leading-[0.8] italic uppercase shimmer-text">
+                LITHIUM <br /> GEAR_
+              </h1>
+           </div>
+           <p className="text-xl text-q-text-secondary italic font-medium max-w-sm text-right leading-relaxed mb-4">
+             "Wear the future. 17% of every acquisition supports my caffeine synchronization protocol."
+           </p>
+        </div>
 
-         <div className="bg-slate-800 border border-slate-700 rounded-[2rem] p-6 text-center shadow-[0_0_40px_rgba(59,130,246,0.1)] border-blue-500/30">
-            <div className="w-full aspect-square bg-gradient-to-br from-blue-600 to-indigo-800 rounded-[1.5rem] mb-6 flex items-center justify-center text-white font-black text-4xl p-6">BLACK HOODIE</div>
-            <h3 className="text-2xl font-bold text-white mb-2">The Founder Hoodie</h3>
-            <p className="text-slate-400 mb-4">$499.99 USD</p>
-            <p className="text-sm text-slate-500 mb-6 px-4">Mandatory uniform for 17-year-old tech tycoons. Very dark. Very moody. Overpriced.</p>
-            <button onClick={()=>setError("Out of stock. Only I get to wear it.")} className="w-full py-4 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-500 shadow-lg shadow-blue-500/20">Add to Cart</button>
-         </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-12">
+          <MerchCard 
+            title="'Solo Dev' Hoodie"
+            price="64.00"
+            color="from-cyan-500 to-indigo-600"
+            delay={0.1}
+          />
+          <MerchCard 
+            title="Kernel Cap v5"
+            price="32.00"
+            color="from-rose-500 to-orange-600"
+            delay={0.2}
+          />
+          <MerchCard 
+            title="WASM Protocol Tee"
+            price="38.00"
+            color="from-violet-500 to-emerald-500"
+            delay={0.3}
+          />
+        </div>
 
-         <div className="bg-slate-800 border border-slate-700 rounded-[2rem] p-6 text-center">
-            <div className="w-full aspect-square bg-slate-100 rounded-[1.5rem] mb-6 flex items-center justify-center text-slate-900 font-black text-8xl">.</div>
-            <h3 className="text-2xl font-bold text-white mb-2">Nothing</h3>
-            <p className="text-slate-400 mb-4">$10,000.00 USD</p>
-            <p className="text-sm text-slate-500 mb-6 px-4">Literally just donate to me. You receive absolutely nothing in return.</p>
-            <button onClick={()=>setError("Stripe API threw an error: 'User attempting to send you too much money'.")} className="w-full py-4 bg-white text-slate-900 font-bold rounded-xl hover:bg-slate-200">Buy Nothing</button>
-         </div>
+        {/* Exclusive Membership */}
+        <motion.div 
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-40 p-16 rounded-[4rem] q-glass border-white/5 relative overflow-hidden flex flex-col items-center text-center shadow-2xl"
+        >
+           <div className="absolute inset-0 spatial-mesh opacity-5" />
+           <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mb-10 border border-white/10 shadow-2xl group cursor-pointer hover:scale-110 transition-transform">
+              <Sparkles size={40} className="text-cyan-400 group-hover:rotate-12 transition-transform" />
+           </div>
+           <h2 className="text-4xl md:text-6xl font-black mb-8 italic uppercase tracking-tighter">Genesis Node Member</h2>
+           <p className="text-xl text-white/40 mb-12 max-w-2xl italic font-medium leading-relaxed">
+             Unlock early access to future OS droplets, private terminal themes, and physical artifacts.
+           </p>
+           <button className="btn-primary px-16 py-6 rounded-3xl text-xs tracking-[0.4em] font-black uppercase italic shadow-2xl hover:shadow-cyan-500/20">Aquire Membership</button>
+        </motion.div>
       </div>
+
+      <footer className="mt-40 pt-20 border-t border-white/5 text-center px-6">
+        <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] mb-4">Lithium Gear // Est 2024</p>
+        <p className="text-white/40 text-xs italic">Shipping worldwide from the digital void.</p>
+      </footer>
     </div>
-  )
+  );
 }

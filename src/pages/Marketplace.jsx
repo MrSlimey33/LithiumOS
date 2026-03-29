@@ -1,180 +1,133 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Sparkles, AlertCircle, ShoppingCart, Loader2, Download, CloudOff, ChevronRight, Layout, Zap, Database } from 'lucide-react';
-import * as LucideIcons from 'lucide-react';
+import { Store, Star, Download, ShieldCheck, Zap, Globe, Cpu, Layout, Search, Filter, ShoppingBag, ArrowUpRight } from 'lucide-react';
+
+const APP_DATA = [
+  { id: 'devstudio', name: 'Dev Studio', category: 'Productivity', rating: 4.9, icon: Layout, color: 'from-blue-500 to-indigo-600', desc: 'Full-featured IDE for the spatial web.' },
+  { id: 'terminal', name: 'Hermes Terminal', category: 'Utilities', rating: 5.0, icon: Cpu, color: 'from-slate-700 to-black', desc: 'The ultimate POSIX shell for power users.' },
+  { id: 'photos', name: 'Lens Gallery', category: 'Media', rating: 4.7, icon: Globe, color: 'from-fuchsia-500 to-pink-500', desc: 'Minimalist AI-powered photo management.' },
+  { id: 'synthesia', name: 'Synthesia', category: 'Media', rating: 4.8, icon: Zap, color: 'from-emerald-400 to-teal-500', desc: 'Professional audio workstation and sequencer.' },
+  { id: 'vault', name: 'Identity Vault', category: 'Security', rating: 4.9, icon: ShieldCheck, color: 'from-rose-400 to-red-600', desc: 'Secure decentralized identity management.' },
+];
+
+const AppCard = ({ app, delay }) => (
+  <motion.div 
+    initial={{ opacity: 0, scale: 0.95 }}
+    whileInView={{ opacity: 1, scale: 1 }}
+    viewport={{ once: true }}
+    transition={{ delay, duration: 0.5 }}
+    className="q-glass rounded-[2rem] p-6 border-white/10 hover:border-cyan-500/30 transition-all group flex flex-col"
+  >
+    <div className={`w-16 h-16 rounded-2xl bg-gradient-to-br ${app.color} flex items-center justify-center mb-6 shadow-xl group-hover:scale-110 transition-transform duration-500`}>
+      <app.icon size={30} className="text-white drop-shadow-lg" />
+    </div>
+    <div className="flex-1">
+      <div className="flex justify-between items-start mb-2">
+        <h3 className="text-xl font-bold text-white tracking-tight">{app.name}</h3>
+        <div className="flex items-center gap-1 text-cyan-400">
+          <Star size={12} fill="currentColor" />
+          <span className="text-xs font-black">{app.rating}</span>
+        </div>
+      </div>
+      <p className="text-sm text-white/40 mb-6 leading-relaxed uppercase tracking-wider font-bold text-[10px]">{app.category}</p>
+      <p className="text-q-text-secondary line-clamp-2 text-sm leading-relaxed mb-8">{app.desc}</p>
+    </div>
+    <button className="w-full py-4 rounded-xl bg-white/5 border border-white/10 text-white font-black text-[10px] uppercase tracking-widest group-hover:bg-cyan-500 group-hover:text-black group-hover:border-cyan-500 transition-all flex items-center justify-center gap-2">
+      Install App <ArrowUpRight size={14} />
+    </button>
+  </motion.div>
+);
 
 export default function Marketplace() {
-  const [modal, setModal] = useState(null);
-  const [apps, setApps] = useState([]);
-  const [status, setStatus] = useState('loading'); // loading, success, error, empty
-  const id = window.localStorage.getItem('LITHIUM_CLOUD_ID');
-
-  useEffect(() => {
-    fetch('https://api.github.com/repos/MrSlimey33/LithiumOS/issues?state=open&per_page=100')
-      .then(res => res.json())
-      .then(data => {
-        if (!Array.isArray(data)) throw new Error("Invalid API Response");
-        
-        const parsedApps = [];
-        for (const issue of data) {
-           try {
-              const body = issue.body || '';
-              // ROBUST REGEX (handles \r\n and additional whitespace)
-              const jsonMatch = body.match(/```json\s*([\s\S]*?)\s*```/);
-              if (jsonMatch && jsonMatch[1]) {
-                 const appData = JSON.parse(jsonMatch[1].trim());
-                 
-                 // V2 DATA VALIDATION (CRASH PREVENTION)
-                 // We MUST have a name and some form of executable (code or legacy url)
-                 if (appData.name && (appData.code || appData.url)) {
-                    parsedApps.push({
-                       id: `ext_${issue.id}`,
-                       title: String(appData.name).slice(0, 40),
-                       dev: appData.developer || issue.user.login,
-                       // SAFE ICON FALLBACK
-                       icon: appData.icon || 'Box',
-                       img: appData.color || 'from-slate-700 to-slate-900',
-                       desc: appData.description || 'A native Lithium Node module.',
-                       // Handle case where code might be missing but we don't want to crash
-                       code: appData.code || `<!-- Legacy Module -->\n<iframe src="${appData.url}" style="width:100%;height:100%;border:none;"></iframe>`,
-                       issueUrl: issue.html_url
-                    });
-                 }
-              }
-           } catch (e) { 
-              console.warn("Skipping malformed app issue:", issue.id, e); 
-           }
-        }
-        setApps(parsedApps);
-        setStatus(parsedApps.length > 0 ? 'success' : 'empty');
-      })
-      .catch(err => {
-        console.error("Marketplace Fetch Error:", err);
-        setStatus('error');
-      });
-  }, []);
-
-  const handleInstall = (app) => {
-     if (!id) return;
-     const extRaw = window.localStorage.getItem('LITHIUM_ext_apps');
-     const extApps = extRaw ? JSON.parse(extRaw) : {};
-     extApps[app.id] = app;
-     window.localStorage.setItem('LITHIUM_ext_apps', JSON.stringify(extApps));
-
-     const coreRaw = window.localStorage.getItem('LITHIUM_apps_core');
-     const core = coreRaw ? JSON.parse(coreRaw) : [];
-     if (!core.includes(app.id)) {
-        core.push(app.id);
-        window.localStorage.setItem('LITHIUM_apps_core', JSON.stringify(core));
-     }
-
-     alert(`Successfully installed ${app.title} to your Lithium Cloud ID!`);
-     setModal(null);
-  };
-
   return (
-    <div className="min-h-screen bg-black font-sans text-white selection:bg-blue-500/30 overflow-x-hidden">
-       {/* PREMIUM HEADER */}
-       <header className="relative h-[80vh] flex flex-col items-center justify-center text-center px-6 overflow-hidden">
-          <motion.div initial={{opacity:0, scale:1.1}} animate={{opacity:0.25, scale:1}} transition={{duration:2}} className="absolute inset-0 -z-10">
-             <img src="/LithiumOS/src/lithium_ecosystem_glass_1774731922652.png" alt="Ecosystem" className="w-full h-full object-cover" />
-             <div className="absolute inset-x-0 bottom-0 h-96 bg-gradient-to-t from-black via-black/40 to-transparent" />
-          </motion.div>
+    <div className="bg-q-void min-h-screen pt-40 pb-20 px-6 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-violet-500/5 blur-[120px] rounded-full pointer-events-none" />
+      
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Header */}
+        <div className="flex flex-col md:flex-row justify-between items-end gap-8 mb-20">
+          <div className="max-w-2xl">
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="flex items-center gap-3 text-cyan-400 mb-6"
+            >
+              <ShoppingBag size={20} />
+              <span className="text-[10px] font-black uppercase tracking-[0.4em]">The Neural Market</span>
+            </motion.div>
+            <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-none mb-4">APPS FOR THE <br/> <span className="shimmer-text">NEXT ERA</span></h1>
+            <p className="text-xl text-q-text-secondary italic">Curated experiences built for the Helium kernel.</p>
+          </div>
+          
+          <div className="flex gap-4">
+             <div className="relative group">
+                <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2 text-white/20 group-focus-within:text-cyan-400 transition-colors" />
+                <input 
+                  type="text" 
+                  placeholder="Browse Apps..." 
+                  className="bg-white/5 border border-white/5 rounded-2xl py-4 pl-12 pr-6 outline-none focus:border-cyan-500/30 text-white w-64 transition-all"
+                />
+             </div>
+             <button className="w-14 h-14 rounded-2xl bg-white/5 border border-white/5 flex items-center justify-center hover:bg-white/10 transition-all text-white/60">
+                <Filter size={20} />
+             </button>
+          </div>
+        </div>
 
-          <motion.div initial={{y:40, opacity:0}} animate={{y:0, opacity:1}} transition={{duration:1}} className="max-w-4xl relative z-10">
-             <div className="flex items-center justify-center gap-2 mb-8 text-[10px] font-black uppercase tracking-[0.4em] text-blue-500">
-                <Database size={14}/> Node Marketplace
-             </div>
-             <h1 className="text-6xl md:text-[120px] font-black tracking-tighter leading-[0.85] mb-8 shimmer-text">
-                The New<br/>Digital Library.
-             </h1>
-             <p className="text-xl md:text-2xl text-slate-400 font-medium max-w-2xl mx-auto mb-16 leading-relaxed">
-                Browse hundreds of community-built native modules. Scalable, zero-config, and instantly executable on any device.
-             </p>
-             <div className="max-w-xl mx-auto relative">
-                <input type="text" className="w-full glass-liquid rounded-full py-5 px-14 text-white outline-none focus:ring-4 ring-blue-500/20 transition-all font-bold text-lg placeholder-slate-600" placeholder="Search the library..." />
-                <Search className="absolute left-6 top-1/2 -translate-y-1/2 text-slate-600" size={24} />
-             </div>
-          </motion.div>
-       </header>
+        {/* Featured App */}
+        <motion.div 
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative rounded-[3rem] overflow-hidden p-12 mb-20 border border-white/10 group"
+        >
+           <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1614850715649-1d0106293cb1?q=80&w=2564&auto=format&fit=crop')] bg-cover bg-center brightness-[0.25] group-hover:scale-105 transition-transform duration-[10s]" />
+           <div className="absolute inset-0 bg-gradient-to-r from-black to-transparent" />
+           <div className="relative z-10 max-w-xl">
+              <span className="px-3 py-1 bg-cyan-500 text-black text-[9px] font-black uppercase tracking-widest rounded-full mb-8 inline-block">App of the Month</span>
+              <h2 className="text-5xl font-black text-white mb-6 tracking-tighter italic">QUANTUM EDITOR</h2>
+              <p className="text-lg text-white/60 mb-10 leading-relaxed italic">The first spatial IDE featuring real-time AI collaboration and holographic debugging. Build the web from within the web.</p>
+              <button className="btn-primary">Learn More</button>
+           </div>
+        </motion.div>
 
-       <div className="max-w-7xl mx-auto px-6 py-32 min-h-[60vh]">
-          {status === 'loading' && (
-             <div className="w-full h-full flex flex-col items-center justify-center gap-8 py-20">
-                <motion.div animate={{rotate:360}} transition={{repeat:Infinity, duration:1, ease:'linear'}} className="w-12 h-12 rounded-full border-2 border-white/5 border-t-white" />
-                <p className="text-[10px] font-black uppercase tracking-[0.5em] text-slate-600">Syncing with Registry</p>
-             </div>
-          )}
+        {/* Categories */}
+        <div className="flex gap-4 mb-16 overflow-x-auto pb-4 scrollbar-hide">
+           {['All Apps', 'Productivity', 'Utilities', 'Security', 'Media', 'System'].map((cat, i) => (
+              <button 
+                key={cat} 
+                className={`px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest whitespace-nowrap transition-all ${i === 0 ? 'bg-cyan-500 text-black shadow-[0_0_20px_rgba(0,212,255,0.3)]' : 'bg-white/5 text-white/40 hover:bg-white/10'}`}
+              >
+                {cat}
+              </button>
+           ))}
+        </div>
 
-          {status === 'empty' && (
-             <div className="w-full py-20 text-center flex flex-col items-center gap-6">
-                <CloudOff size={64} className="text-slate-800" />
-                <h3 className="text-3xl font-black tracking-tight">The Library is Empty.</h3>
-                <p className="text-slate-500 max-w-sm mx-auto">Be the first to push a new Node to the public registry using the Dev Studio.</p>
-             </div>
-          )}
+        {/* Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {APP_DATA.map((app, i) => (
+            <AppCard key={app.id} app={app} delay={i * 0.1} />
+          ))}
+        </div>
 
-          {status === 'success' && (
-             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                {apps.map((a, i) => {
-                   const IconComponent = LucideIcons[a.icon] || LucideIcons.Box;
-                   return (
-                      <motion.div 
-                        initial={{opacity:0, y:30}} whileInView={{opacity:1, y:0}} transition={{delay: i * 0.05}}
-                        key={a.id} className="glass-liquid rounded-[3.5rem] p-10 flex flex-col items-center text-center group hover:scale-[1.02] transition-all cursor-pointer"
-                        onClick={() => setModal(a)}
-                      >
-                         <div className={`w-28 h-28 rounded-[2.2rem] bg-gradient-to-br ${a.img} shadow-inner mb-8 flex items-center justify-center border border-white/10 group-hover:scale-110 transition-transform`}>
-                            {IconComponent && <IconComponent className="text-white drop-shadow-2xl" size={42} />}
-                         </div>
-                         <h3 className="text-2xl font-black text-white mb-2 tracking-tight">{a.title}</h3>
-                         <span className="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-6">By {a.dev}</span>
-                         <p className="text-sm text-slate-400 font-medium leading-relaxed line-clamp-2">{a.desc}</p>
-                      </motion.div>
-                   );
-                })}
-             </div>
-          )}
-       </div>
+        {/* Developers Section */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          className="mt-40 p-16 rounded-[4rem] bg-black border border-white/5 text-center relative overflow-hidden"
+        >
+           <div className="absolute inset-0 spatial-mesh opacity-10" />
+           <h2 className="text-4xl md:text-6xl font-black mb-8 relative z-10 tracking-tighter">BUILD THE ECOSYSTEM</h2>
+           <p className="text-xl text-white/40 mb-12 max-w-2xl mx-auto relative z-10 font-medium italic">
+             Are you a developer? Join the Lithium ecosystem and ship high-performance spatial apps to millions of users.
+           </p>
+           <button className="btn-secondary relative z-10 italic">Get SDK Access</button>
+        </motion.div>
+      </div>
 
-       {/* MODAL REDESIGN */}
-       <AnimatePresence>
-          {modal && (
-             <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/90 backdrop-blur-3xl p-6">
-                <motion.div 
-                   initial={{scale:0.9, opacity:0}} animate={{scale:1, opacity:1}} exit={{scale:0.9, opacity:0}}
-                   className="glass-liquid rounded-[4rem] p-12 max-w-xl w-full shadow-4xl text-center border border-white/5 relative"
-                >
-                   <div className="mb-10">
-                      <div className={`w-32 h-32 mx-auto rounded-[3rem] bg-gradient-to-br ${modal.img} shadow-2xl mb-10 flex items-center justify-center border border-white/20`}>
-                         {(() => {
-                            const ModalIcon = LucideIcons[modal.icon] || LucideIcons.Box;
-                            return ModalIcon ? <ModalIcon size={56} className="text-white drop-shadow-2xl" /> : null;
-                         })()}
-                      </div>
-                      <h2 className="text-5xl font-black text-white mb-3 tracking-tighter">{modal.title}</h2>
-                      <p className="text-sm text-blue-500 font-black mb-8 uppercase tracking-widest leading-none underline underline-offset-8 decoration-blue-500/20">Certified Node Module</p>
-                      <p className="text-lg text-slate-400 leading-relaxed font-medium mb-12">{modal.desc}</p>
-                   </div>
-                   
-                   {!id ? (
-                      <div className="bg-white/5 p-6 rounded-3xl text-slate-500 font-bold mb-10 text-sm italic">You must be logged into Lithium to deploy.</div>
-                   ) : (
-                      <div className="bg-blue-600/10 text-blue-400 p-6 rounded-3xl flex items-center justify-center gap-3 font-black text-xs uppercase tracking-widest border border-blue-500/20 mb-10">
-                         <Sparkles size={16}/> Ready for Native Engine Boot
-                      </div>
-                   )}
-                   
-                   <div className="flex gap-6">
-                      <button className="flex-1 text-slate-600 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors" onClick={()=>setModal(null)}>Dismiss</button>
-                      <button disabled={!id} onClick={() => handleInstall(modal)} className="flex-[3] bg-white text-black py-5 rounded-full font-black text-xl hover:scale-105 active:scale-95 transition-all shadow-xl shadow-white/10 disabled:opacity-20 flex items-center justify-center gap-2">
-                         <Download size={22}/> Install Node
-                      </button>
-                   </div>
-                </motion.div>
-             </div>
-          )}
-       </AnimatePresence>
+      <footer className="mt-40 pt-20 border-t border-white/5 text-center px-6">
+        <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] mb-4">Marketplace // Lithium Project</p>
+        <p className="text-white/40 text-xs italic">All assets verified for the Lithium ecosystem.</p>
+      </footer>
     </div>
   );
 }

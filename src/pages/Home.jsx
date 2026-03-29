@@ -1,115 +1,210 @@
-import React from 'react';
-import { motion } from 'framer-motion';
-import { useNavigate } from 'react-router-dom';
-import { ChevronRight, Zap, Shield, Layout, Cpu, Globe } from 'lucide-react';
+import React, { useEffect, useRef } from 'react';
+import { motion, useScroll, useTransform, useSpring } from 'framer-motion';
+import { Terminal, Shield, Cpu, Zap, Globe, ArrowRight, Layout, Code2, Layers } from 'lucide-react';
+import { Link } from 'react-router-dom';
+
+const FeatureCard = ({ icon: Icon, title, description, delay }) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ delay, duration: 0.8, ease: [0.21, 0.45, 0.32, 0.9] }}
+    className="feature-card p-8 group relative overflow-hidden"
+  >
+    <div className="absolute inset-0 bg-gradient-to-br from-cyan-500/5 to-violet-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+    <div className="relative z-10">
+      <div className="w-12 h-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center mb-6 border border-cyan-500/20 group-hover:scale-110 transition-transform duration-500">
+        <Icon size={24} className="text-cyan-400" />
+      </div>
+      <h3 className="text-xl font-bold mb-3 text-white">{title}</h3>
+      <p className="text-q-text-secondary leading-relaxed">{description}</p>
+    </div>
+  </motion.div>
+);
 
 export default function Home() {
-  const navigate = useNavigate();
+  const containerRef = useRef(null);
+  const { scrollYProgress } = useScroll({
+    target: containerRef,
+    offset: ["start start", "end start"]
+  });
+
+  const y = useTransform(scrollYProgress, [0, 1], ["0%", "50%"]);
+  const opacity = useTransform(scrollYProgress, [0, 0.5], [1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.5], [1, 0.9]);
 
   return (
-    <div className="min-h-screen bg-black text-white font-sans selection:bg-blue-500/30 overflow-x-hidden">
-      {/* NAVIGATIONBAR */}
-      <nav className="fixed top-0 inset-x-0 h-14 glass-liquid z-[100] flex items-center justify-between px-6 md:px-12">
-        <div className="flex items-center gap-2 cursor-pointer" onClick={() => window.scrollTo({top:0, behavior:'smooth'})}>
-          <div className="w-6 h-6 rounded bg-white flex items-center justify-center shadow-lg shadow-white/10"><Zap size={14} className="text-black fill-black" /></div>
-          <span className="text-sm font-black tracking-tighter uppercase italic">Lithium</span>
-        </div>
-        <div className="flex items-center gap-8 text-[10px] font-black tracking-widest uppercase text-slate-500">
-           <a href="#/marketplace" className="hover:text-white transition-colors">Market</a>
-           <a href="#/developers" className="hover:text-white transition-colors">Nodes</a>
-           <a href="#/technology" className="hover:text-white transition-colors">Engine</a>
-           <button onClick={() => navigate('/login')} className="bg-white text-black px-4 py-1.5 rounded-full hover:scale-105 transition-transform active:scale-95 text-[10px] font-black uppercase">Launch</button>
-        </div>
-      </nav>
-
-      {/* HERO SECTION */}
-      <section className="relative h-screen flex flex-col items-center justify-center text-center px-6 overflow-hidden">
+    <div ref={containerRef} className="relative bg-q-void overflow-x-hidden min-h-screen">
+      {/* ─── Cinematic Hero Section ─── */}
+      <section className="relative min-h-screen flex items-center justify-center px-6 overflow-hidden">
+        {/* Animated Background Mesh */}
+        <div className="absolute inset-0 spatial-mesh opacity-40" />
+        <div className="absolute inset-0 grid-pattern opacity-10" />
+        
+        {/* Hero Content */}
         <motion.div 
-          initial={{ opacity: 0, scale: 1.1 }}
-          animate={{ opacity: 0.35, scale: 1 }}
-          transition={{ duration: 2 }}
-          className="absolute inset-0 -z-10"
+          style={{ y, opacity, scale }}
+          className="relative z-20 max-w-6xl mx-auto text-center"
         >
-          {/* Note: In a real deploy, ensure the path is correct relative to public/src */}
-          <img 
-            src="/LithiumOS/src/lithium_hero_abstract_1774731906213.png" 
-            alt="Hero Background" 
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.target.src = "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=2070";
-            }}
-          />
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/20 to-black" />
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: "easeOut" }}
+            className="mb-6"
+          >
+            <span className="px-4 py-1.5 rounded-full border border-cyan-500/30 bg-cyan-500/10 text-cyan-400 text-xs font-bold uppercase tracking-[0.2em] animate-pulse-glow">
+              Now in Orbit: Version 5.0
+            </span>
+          </motion.div>
+          
+          <motion.h1 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.2, ease: "easeOut" }}
+            className="text-6xl md:text-8xl lg:text-9xl font-black mb-8 leading-[0.9] tracking-tighter shimmer-text"
+          >
+            THE OS FOR <br /> THE SPATIAL WEB
+          </motion.h1>
+
+          <motion.p 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.4, ease: "easeOut" }}
+            className="text-xl md:text-2xl text-q-text-secondary max-w-3xl mx-auto mb-12 leading-relaxed"
+          >
+            A high-fidelity workstation running entirely in your browser. 
+            No installs, no compromises. Just pure spatial computing.
+          </motion.p>
+
+          <motion.div 
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 1, delay: 0.6, ease: "easeOut" }}
+            className="flex flex-col sm:flex-row gap-6 justify-center"
+          >
+            <Link to="/station" className="btn-primary group flex items-center gap-2">
+              Launch Station <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+            </Link>
+            <Link to="/technology" className="btn-secondary group">
+              Explore Architecture
+            </Link>
+          </motion.div>
         </motion.div>
 
-        <motion.div initial={{ y: 40, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }} className="max-w-5xl">
-          <h1 className="text-6xl md:text-[140px] font-black tracking-tighter leading-[0.85] mb-8 shimmer-text">
-            Pure Spatial.<br/>Zero Limits.
-          </h1>
-          <p className="text-xl md:text-2xl text-slate-400 font-medium max-w-2xl mx-auto mb-14 leading-relaxed tracking-tight">
-            The minimalist operating system for high-performance builders. One OS. Every device. Natively hosted for the solo-dev era.
-          </p>
-          <div className="flex flex-col md:flex-row items-center justify-center gap-8">
-             <button onClick={() => navigate('/login')} className="px-12 py-6 bg-white text-black rounded-full font-black text-xl hover:scale-105 transition-transform active:scale-95 shadow-2xl shadow-white/10 flex items-center gap-2">
-                Launch Lithium <ChevronRight size={20} />
-             </button>
-             <button onClick={() => navigate('/technology')} className="text-white font-bold text-xl hover:text-blue-400 transition-colors flex items-center gap-1 group">
-                Review the Engine <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
-             </button>
+        {/* Floating UI Elements (Decorative) */}
+        <motion.div 
+          animate={{ y: [0, -20, 0] }}
+          transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
+          className="absolute right-[10%] top-[20%] w-64 h-80 refraction-tile rounded-3xl hidden lg:block opacity-40 rotate-[15deg]"
+        />
+        <motion.div 
+          animate={{ y: [0, 20, 0] }}
+          transition={{ duration: 10, repeat: Infinity, ease: "easeInOut", delay: 1 }}
+          className="absolute left-[5%] bottom-[15%] w-80 h-64 refraction-tile rounded-3xl hidden lg:block opacity-30 -rotate-[10deg]"
+        />
+      </section>
+
+      {/* ─── Features Grid ─── */}
+      <section className="relative z-20 py-32 px-6">
+        <div className="max-w-7xl mx-auto">
+          <div className="mb-24 text-center">
+            <h2 className="text-4xl md:text-6xl font-black mb-6">BUILT FOR POWER</h2>
+            <div className="w-24 h-1 bg-gradient-to-r from-cyan-500 to-violet-500 mx-auto" />
           </div>
-        </motion.div>
 
-        <div className="absolute bottom-12 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-30">
-           <span className="text-[10px] font-bold tracking-[0.4em] uppercase text-slate-400">Scroll</span>
-           <div className="w-px h-16 bg-gradient-to-b from-white to-transparent" />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <FeatureCard 
+              icon={Terminal} 
+              title="Real Terminal" 
+              description="A true Linux terminal emulator using xterm.js. Virtual filesystem, pipes, redirects, and 50+ built-in commands."
+              delay={0.1}
+            />
+            <FeatureCard 
+              icon={Shield} 
+              title="Identity Vault" 
+              description="Secure, cloud-synchronized identity management. Store your keys, tokens, and data with end-to-end encryption."
+              delay={0.2}
+            />
+            <FeatureCard 
+              icon={Zap} 
+              title="Quantum Glass" 
+              description="State-of-the-art UI with high-performance blur, saturation, and glassmorphism. It feels like the future."
+              delay={0.3}
+            />
+            <FeatureCard 
+              icon={Globe} 
+              title="Universal Access" 
+              description="Your entire workstation available on any device with a browser. Sync your state across the globe instantly."
+              delay={0.4}
+            />
+            <FeatureCard 
+              icon={Layout} 
+              title="Spatial Tiling" 
+              description="An advanced window manager designed for focused deep work. Snap, tile, and stack windows with precision."
+              delay={0.5}
+            />
+            <FeatureCard 
+              icon={Layers} 
+              title="Extensible" 
+              description="Build your own apps using the Lithium SDK. A modular architecture that scales with your needs."
+              delay={0.6}
+            />
+          </div>
         </div>
       </section>
 
-      {/* FEATURE GRIDS: THE APPLE WAY */}
-      <section className="py-40 px-6 md:px-12 max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-2 gap-10">
-         <motion.div initial={{y:40, opacity:0}} whileInView={{y:0, opacity:1}} className="col-span-1 md:col-span-2 glass-liquid rounded-[4rem] p-12 md:p-24 overflow-hidden relative group">
-            <div className="relative z-10 max-w-2xl">
-               <div className="w-14 h-14 rounded-2xl bg-blue-500/20 text-blue-400 flex items-center justify-center mb-10"><Cpu size={28}/></div>
-               <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 leading-[0.95]">The Node Engine.<br/>Native Execution.</h2>
-               <p className="text-xl text-slate-400 leading-relaxed mb-12 font-medium">Lithium transforms your web apps into 'Nodes'—sandboxed native modules executed with precision directly in the spatial environment. No external hosting. No latency. Just raw logic.</p>
-               <button onClick={() => navigate('/developers')} className="text-blue-400 font-black text-lg flex items-center gap-2 hover:gap-6 transition-all uppercase tracking-widest">Learn About Nodes <ChevronRight size={20}/></button>
+      {/* ─── CTA Section ─── */}
+      <section className="relative py-32 px-6 bg-q-surface-0 border-y border-white/5">
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <h2 className="text-5xl md:text-7xl font-black mb-8 shimmer-text">READY TO EVOLVE?</h2>
+          <p className="text-xl text-q-text-secondary mb-12">
+            Experience the internet through a different lens. Lithium OS isn't just a website; it's a new perspective on computing.
+          </p>
+          <div className="flex flex-col sm:flex-row gap-6 justify-center">
+            <Link to="/station" className="btn-primary">Get Started Now</Link>
+            <Link to="/marketplace" className="btn-secondary">Explore Apps</Link>
+          </div>
+        </div>
+        <div className="absolute inset-0 noise-overlay opacity-10" />
+      </section>
+
+      {/* ─── Footer ─── */}
+      <footer className="py-20 px-6 border-t border-white/5">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+          <div className="col-span-1 md:col-span-2">
+            <h3 className="text-2xl font-black mb-6 gradient-text-cyan">LITHIUM OS</h3>
+            <p className="text-q-text-secondary max-w-sm mb-8">
+              Pioneering the spatial web. A production-grade operating system within the browser.
+            </p>
+            <div className="flex gap-4">
+              <a href="https://github.com" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+                <Globe size={20} className="text-white/60" />
+              </a>
+              <a href="https://twitter.com" className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-white/10 transition-colors">
+                <ExternalLink size={20} className="text-white/60" />
+              </a>
             </div>
-            <div className="absolute -right-40 -bottom-40 w-[800px] h-[800px] bg-blue-500/5 rounded-full blur-[160px] group-hover:bg-blue-500/10 transition-all pointer-events-none" />
-         </motion.div>
-
-         <motion.div initial={{y:40, opacity:0}} whileInView={{y:0, opacity:1}} className="glass-liquid rounded-[3.5rem] p-16 relative overflow-hidden group min-h-[500px] flex flex-col justify-end">
-            <Shield className="text-white mb-10 opacity-20" size={64} />
-            <h3 className="text-4xl font-black tracking-tighter mb-6 text-white">Encrypted Vaults.</h3>
-            <p className="text-lg text-slate-400 leading-relaxed font-medium">Your data belongs to you. Period. We use standard AES-256 local-first encryption with GitHub cloud syncing using your own personal token.</p>
-         </motion.div>
-
-         <motion.div initial={{y:40, opacity:0}} whileInView={{y:0, opacity:1}} className="glass-liquid rounded-[3.5rem] p-16 relative overflow-hidden group min-h-[500px] flex flex-col justify-end">
-            <Layout className="text-white mb-10 opacity-20" size={64} />
-            <h3 className="text-4xl font-black tracking-tighter mb-6 text-white">Spatial Logic.</h3>
-            <p className="text-lg text-slate-400 leading-relaxed font-medium">A windowing system that respects your focus. Smooth transitions, intelligent snapping, and deep customizability for every solo-dev task.</p>
-         </motion.div>
-      </section>
-
-      {/* MARKETPLACE TEASER */}
-      <section className="py-60 px-6 text-center border-t border-white/5 relative overflow-hidden">
-         <div className="absolute inset-0 bg-blue-600/5 blur-[120px] -z-10" />
-         <motion.div initial={{scale:0.95, opacity:0}} whileInView={{scale:1, opacity:1}} transition={{duration:1}} className="max-w-4xl mx-auto">
-            <h2 className="text-6xl md:text-[100px] font-black tracking-tighter mb-10 shimmer-text">The Ecosystem.</h2>
-            <p className="text-xl md:text-2xl text-slate-400 mb-16 max-w-2xl mx-auto leading-relaxed font-medium">Browse hundreds of community-built Node apps in our zero-cost marketplace. One-click installs. Infinite possibilities.</p>
-            <button onClick={() => navigate('/marketplace')} className="bg-white text-black px-16 py-7 rounded-full font-black text-2xl hover:scale-110 active:scale-95 transition-all shadow-4xl shadow-white/20">
-                Explore The Marketplace
-            </button>
-         </motion.div>
-      </section>
-
-      {/* FOOTER */}
-      <footer className="py-24 px-6 border-t border-white/5 text-center">
-         <div className="flex justify-center gap-16 mb-16 text-[10px] font-black uppercase tracking-[0.4em] text-slate-600">
-            <a href="https://github.com/MrSlimey33/LithiumOS" className="hover:text-white transition-colors">GitHub</a>
-            <a href="#" className="hover:text-white transition-colors">Discord</a>
-            <a href="#" className="hover:text-white transition-colors">X</a>
-         </div>
-         <p className="text-[10px] font-black text-slate-800 uppercase tracking-[0.5em]">© 2026 Lithium Project. Built for the high-end solo-dev.</p>
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Platform</h4>
+            <ul className="space-y-4 text-q-text-secondary">
+              <li><Link to="/station" className="hover:text-cyan-400 transition-colors">Launch Station</Link></li>
+              <li><Link to="/marketplace" className="hover:text-cyan-400 transition-colors">App Marketplace</Link></li>
+              <li><Link to="/technology" className="hover:text-cyan-400 transition-colors">Architecture</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="text-sm font-bold text-white mb-6 uppercase tracking-widest">Connect</h4>
+            <ul className="space-y-4 text-q-text-secondary">
+              <li><Link to="/developers" className="hover:text-cyan-400 transition-colors">Documentation</Link></li>
+              <li><Link to="/merch" className="hover:text-cyan-400 transition-colors">Official Merch</Link></li>
+              <li><Link to="/manifesto" className="hover:text-cyan-400 transition-colors">The Manifesto</Link></li>
+            </ul>
+          </div>
+        </div>
+        <div className="max-w-7xl mx-auto mt-20 pt-10 border-t border-white/5 text-center text-q-text-muted text-sm">
+          &copy; 2026 Lithium Project. Built with &hearts; for the Spatial Web.
+        </div>
       </footer>
     </div>
   );

@@ -16,17 +16,14 @@ export default function Station() {
       navigate('/login');
     } else {
       setAuthChecked(true);
-      // Simulate boot sequence
       const logs = [
-         "Initializing Lithium Kernel v4.2.0...",
-         "Solo-Dev Mode: ENABLED",
-         "Caffeine Levels: OPTIMAL",
-         "Bypassing Silicon Valley Gatekeepers...",
-         "Authenticating Founder: " + user,
-         "Loading Spatial Window Manager...",
-         "Establishing AeroEngine Compositor...",
-         "Checking for Homework: 0 files found (Good).",
-         "Boot Sequence Complete. Yielding to UI Thread."
+         "Loading Obsidian Quantum Kernel v5.0.0...",
+         "Initializing Virtual Filesystem Architecture...",
+         "Establishing Secure Node Connections...",
+         "Bypassing Traditional Browser Constraints...",
+         "Synchronizing Cloud Vault Index...",
+         "founder@" + user + ": login successful",
+         "Ready: Yielding to Spatial Thread."
       ];
       
       let index = 0;
@@ -36,9 +33,9 @@ export default function Station() {
           index++;
         } else {
           clearInterval(interval);
-          setTimeout(() => setBootSequence(false), 800);
+          setTimeout(() => setBootSequence(false), 1200);
         }
-      }, 300);
+      }, 250);
 
       return () => clearInterval(interval);
     }

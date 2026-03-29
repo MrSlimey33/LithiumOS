@@ -1,244 +1,151 @@
-import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Code2, Database, Terminal, Zap, ExternalLink, Plus, Trash2, Settings2, Type, Square, Layout, MousePointer2, ChevronRight, Save } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import React from 'react';
+import { motion } from 'framer-motion';
+import { Code2, Terminal, Cpu, Zap, Globe, BookOpen, Layers, Rocket, Command, GitBranch } from 'lucide-react';
 
-const NODE_TYPES = {
-  TITLE: { n: 'Title', ic: Type, d: { text: 'New Title', color: '#ffffff', size: '3rem' } },
-  TEXT: { n: 'Paragraph', ic: Type, d: { text: 'Add your description here...', color: '#94a3b8', size: '1rem' } },
-  BUTTON: { n: 'Button', ic: MousePointer2, d: { text: 'Click Me', bg: '#3b82f6', color: '#ffffff', action: 'alert("Hello World!")' } },
-  CARD: { n: 'Card', ic: Square, d: { bg: 'rgba(255,255,255,0.05)', radius: '1.5rem', border: 'rgba(255,255,255,0.1)' } },
-  SPACER: { n: 'Spacer', ic: Layout, d: { height: '2rem' } }
-};
+const DocCard = ({ title, description, icon: Icon, delay }) => (
+  <motion.div 
+    initial={{ opacity: 0, y: 20 }}
+    whileInView={{ opacity: 1, y: 0 }}
+    viewport={{ once: true }}
+    transition={{ delay, duration: 0.6 }}
+    className="q-glass rounded-3xl p-8 border-white/5 hover:border-cyan-500/30 transition-all group cursor-pointer"
+  >
+    <div className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center mb-6 group-hover:scale-110 group-hover:bg-cyan-500/10 transition-all duration-500 shadow-2xl">
+      <Icon size={24} className="text-white/40 group-hover:text-cyan-400" />
+    </div>
+    <h3 className="text-xl font-bold mb-3 text-white tracking-tight">{title}</h3>
+    <p className="text-sm text-q-text-secondary leading-relaxed mb-6 font-medium italic">{description}</p>
+    <div className="flex items-center gap-2 text-cyan-400 font-black text-[9px] uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-opacity">
+      Read Documentation <Command size={10} />
+    </div>
+  </motion.div>
+);
 
 export default function Developers() {
-  const [appName, setAppName] = useState('');
-  const [developer, setDeveloper] = useState('');
-  const [icon, setIcon] = useState('Gamepad2');
-  const [color, setColor] = useState('from-indigo-500 to-purple-600');
-  const [description, setDescription] = useState('');
-
-  // Designer State
-  const [nodes, setNodes] = useState([
-    { id: '1', type: 'TITLE', ...NODE_TYPES.TITLE.d },
-    { id: '2', type: 'TEXT', ...NODE_TYPES.TEXT.d }
-  ]);
-  const [selectedId, setSelectedId] = useState(null);
-
-  const addNode = (type) => {
-    const newNode = {
-      id: Math.random().toString(36).substr(2, 9),
-      type: type,
-      ...NODE_TYPES[type].d
-    };
-    setNodes([...nodes, newNode]);
-    setSelectedId(newNode.id);
-  };
-
-  const updateNode = (id, data) => {
-    setNodes(nodes.map(n => n.id === id ? { ...n, ...data } : n));
-  };
-
-  const deleteNode = (id) => {
-    setNodes(nodes.filter(n => n.id !== id));
-    if (selectedId === id) setSelectedId(null);
-  };
-
-  const moveNode = (id, dir) => {
-    const idx = nodes.findIndex(n => n.id === id);
-    if ((dir === -1 && idx === 0) || (dir === 1 && idx === nodes.length - 1)) return;
-    const newNodes = [...nodes];
-    const item = newNodes.splice(idx, 1)[0];
-    newNodes.splice(idx + dir, 0, item);
-    setNodes(newNodes);
-  };
-
-  const generateSourceCode = () => {
-    let html = `<!DOCTYPE html>\n<html>\n<head>\n<style>\n  body { font-family: sans-serif; background: #0c0c0e; color: white; margin: 0; padding: 2rem; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }\n  .node-btn { padding: 0.8rem 2rem; border-radius: 99px; border: none; font-weight: bold; cursor: pointer; transition: transform 0.2s; }\n  .node-btn:active { scale: 0.95; }\n  .node-card { width: 100%; max-width: 500px; padding: 2rem; box-sizing: border-box; }\n</style>\n</head>\n<body>\n`;
-    
-    nodes.forEach(n => {
-      switch (n.type) {
-        case 'TITLE': html += `  <h1 style="color: ${n.color}; font-size: ${n.size}; margin: 0; text-align: center; font-weight: 800; letter-spacing: -2px;">${n.text}</h1>\n`; break;
-        case 'TEXT': html += `  <p style="color: ${n.color}; font-size: ${n.size}; line-height: 1.6; text-align: center; max-width: 600px;">${n.text}</p>\n`; break;
-        case 'BUTTON': html += `  <button class="node-btn" onclick='${n.action}' style="background: ${n.bg}; color: ${n.color};">${n.text}</button>\n`; break;
-        case 'CARD': html += `  <div class="node-card" style="background: ${n.bg}; border: 1px solid ${n.border}; border-radius: ${n.radius};"></div>\n`; break;
-        case 'SPACER': html += `  <div style="height: ${n.height};"></div>\n`; break;
-      }
-    });
-
-    html += `</body>\n</html>`;
-    return html;
-  };
-
-  const handlePublish = (e) => {
-    e.preventDefault();
-    const payload = {
-      name: appName,
-      developer: developer || 'Anonymous',
-      icon: icon || 'AppWindow',
-      color: color,
-      code: generateSourceCode(),
-      description: description
-    };
-    const issueTitle = encodeURIComponent(`App Submission: ${appName}`);
-    const issueBody = encodeURIComponent(`### LithiumOS App Manifest\n\n\`\`\`json\n${JSON.stringify(payload, null, 2)}\n\`\`\`\n\n_Do not edit this block._`);
-    window.open(`https://github.com/MrSlimey33/LithiumOS/issues/new?title=${issueTitle}&body=${issueBody}&labels=marketplace`, '_blank');
-  };
-
-  const selNode = nodes.find(n => n.id === selectedId);
-
   return (
-    <div className="min-h-screen bg-[#050505] text-slate-200 font-sans selection:bg-blue-500/30 overflow-hidden flex flex-col h-screen">
-       {/* TOP NAV */}
-       <header className="h-16 border-b border-white/5 flex items-center justify-between px-8 bg-black/40 backdrop-blur-xl shrink-0">
-          <div className="flex items-center gap-3">
-             <div className="w-8 h-8 rounded-lg bg-indigo-500 flex items-center justify-center shadow-lg shadow-indigo-500/20"><Zap size={18} className="fill-white"/></div>
-             <h1 className="text-sm font-black tracking-widest uppercase italic">Node Designer</h1>
-             <div className="h-4 w-px bg-white/10 mx-2"/>
-             <span className="text-xs font-bold text-slate-500">{appName || 'Untitled App'}</span>
+    <div className="bg-q-void min-h-screen pt-40 pb-32 px-6 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-[50vw] h-full bg-gradient-to-l from-violet-500/5 to-transparent pointer-events-none" />
+      
+      <div className="max-w-7xl mx-auto relative z-10">
+        {/* Hero */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-20 items-center mb-40">
+          <div>
+            <motion.div
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="inline-flex items-center gap-2 text-cyan-400 mb-6 font-black text-[10px] uppercase tracking-[0.4em]"
+            >
+              <Code2 size={16} /> Developer Portal
+            </motion.div>
+            <h1 className="text-6xl md:text-8xl font-black text-white tracking-tighter leading-[0.9] mb-8 italic">
+              BUILD THE <br /> <span className="shimmer-text uppercase not-italic">SPATIAL FUTURE</span>
+            </h1>
+            <p className="text-xl text-q-text-secondary mb-10 leading-relaxed italic max-w-lg">
+              Everything you need to build high-performance, glassmorphic applications for the Lithium ecosystem.
+            </p>
+            <div className="flex gap-4">
+              <button className="btn-primary flex items-center gap-2">Get Started <Rocket size={18}/></button>
+              <a href="https://github.com" className="btn-secondary flex items-center gap-2">Github <GitBranch size={18}/></a>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-             <button onClick={handlePublish} className="bg-white text-black px-5 py-2 rounded-full font-bold text-xs flex items-center gap-2 hover:scale-105 transition-transform active:scale-95 shadow-xl">
-                <Save size={14}/> Ship Module
-             </button>
+          <div className="relative">
+            <div className="q-glass rounded-[3rem] p-1 border-white/10 aspect-square overflow-hidden shadow-2xl relative group">
+               <div className="absolute inset-0 spatial-mesh opacity-30" />
+               <div className="w-full h-full bg-black/60 p-8 font-mono text-[11px] leading-relaxed overflow-hidden">
+                  <div className="flex gap-1.5 mb-6">
+                     <div className="w-2.5 h-2.5 rounded-full bg-rose-500/50" />
+                     <div className="w-2.5 h-2.5 rounded-full bg-amber-500/50" />
+                     <div className="w-2.5 h-2.5 rounded-full bg-emerald-500/50" />
+                  </div>
+                  <pre className="text-cyan-400/80 group-hover:scale-105 transition-transform duration-[10s]">
+{`const LithiumApp = {
+  id: "quantum-vision",
+  title: "Spatial Core",
+  icon: "Zap",
+  
+  init: async (kernel) => {
+    const ctx = kernel.getContext();
+    ctx.render(<MainUI />);
+    
+    // POSIX Bridge
+    await kernel.fs.mkdir("/app/data");
+    kernel.on("signal", (sig) => {
+      console.log(\`Signal: \${sig}\`);
+    });
+    
+    // High-Perf WebGPU
+    const device = await kernel.gpu.request();
+    return device;
+  }
+};`}
+                  </pre>
+               </div>
+            </div>
+            {/* Decorative Blurs */}
+            <div className="absolute -top-20 -right-20 w-64 h-64 bg-cyan-500/10 blur-[120px] rounded-full" />
+            <div className="absolute -bottom-20 -left-20 w-64 h-64 bg-violet-500/10 blur-[120px] rounded-full" />
           </div>
-       </header>
+        </div>
 
-       <div className="flex-1 flex overflow-hidden">
-          {/* TOOLBOX */}
-          <div className="w-64 border-r border-white/5 p-6 flex flex-col gap-6 bg-black/20">
-             <div className="space-y-4">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500">Node Palette</h3>
-                <div className="grid grid-cols-1 gap-2">
-                   {Object.entries(NODE_TYPES).map(([key, type]) => (
-                      <button key={key} onClick={() => addNode(key)} className="flex items-center gap-3 p-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/5 transition-colors group">
-                         <div className="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center text-slate-400 group-hover:text-white"><type.ic size={16}/></div>
-                         <span className="text-xs font-bold">{type.n}</span>
-                         <Plus size={12} className="ml-auto opacity-0 group-hover:opacity-100"/>
-                      </button>
-                   ))}
-                </div>
-             </div>
-             
-             <div className="mt-auto space-y-4">
-                <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/20">
-                   <h4 className="text-[10px] font-bold text-indigo-400 mb-2 uppercase tracking-tight leading-none">Manifest Sync</h4>
-                   <p className="text-[10px] font-medium text-slate-400 leading-normal">Node data is live-compiled into the manifest payload.</p>
-                </div>
-             </div>
-          </div>
+        {/* Categories */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <DocCard 
+            icon={BookOpen}
+            title="Getting Started"
+            description="Learn the basics of Lithium development, from environment setup to your first 'Hello World' app."
+            delay={0.1}
+          />
+          <DocCard 
+            icon={Layers}
+            title="Lithium SDK"
+            description="Explore our rich library of React components and hooks specifically designed for spatial glass UI."
+            delay={0.2}
+          />
+          <DocCard 
+            icon={Terminal}
+            title="Runtime CLI"
+            description="Control the OS programmatically using the Hermes Terminal API and custom shell scripting."
+            delay={0.3}
+          />
+          <DocCard 
+            icon={Cpu}
+            title="System Bridge"
+            description="Access browser-level APIs like WebGPU, WebAudio, and WebHID through our secure Posix abstraction layer."
+            delay={0.4}
+          />
+          <DocCard 
+            icon={Shield}
+            title="Security & Auth"
+            description="Implement secure data persistence and LithiumID authentication for user-specific configurations."
+            delay={0.5}
+          />
+          <DocCard 
+            icon={Globe}
+            title="Cloud Deployment"
+            description="Ship your apps to the Lithium Marketplace and reach users across the entire spatial web."
+            delay={0.6}
+          />
+        </div>
 
-          {/* STAGE (CANVAS) */}
-          <div className="flex-1 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.8] relative overflow-y-auto p-12 flex flex-col items-center">
-             <div className="absolute inset-0 bg-[#050505] -z-10" />
-             <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-indigo-600/5 rounded-full blur-[120px] -z-10" />
-             
-             <div className="w-full max-w-2xl bg-[#0c0c0e] min-h-full rounded-[3rem] border border-white/5 shadow-2xl p-10 flex flex-col items-center gap-4 relative isolate">
-                <div className="absolute top-4 inset-x-0 flex justify-center opacity-20"><div className="w-12 h-1 bg-white/20 rounded-full"/></div>
-                
-                {nodes.length === 0 && (
-                   <div className="flex-1 flex flex-col items-center justify-center text-slate-600 italic gap-4">
-                      <Layout size={48} className="opacity-20"/>
-                      <p className="text-sm font-medium">Drag nodes onto the stage to build</p>
-                   </div>
-                )}
+        {/* API Reference Banner */}
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          className="mt-40 p-16 rounded-[4rem] bg-black/40 backdrop-blur-3xl border border-white/5 text-center relative overflow-hidden shadow-2xl"
+        >
+          <div className="absolute inset-0 noise-overlay opacity-5" />
+          <h2 className="text-4xl md:text-6xl font-black mb-8 relative z-10 tracking-tighter italic">EXPLORE THE FULL API</h2>
+          <p className="text-xl text-white/40 mb-12 max-w-2xl mx-auto relative z-10 italic font-medium">
+            Deep dive into the core Helium kernel and the Lithium runtime specifications.
+          </p>
+          <button className="btn-secondary relative z-10 uppercase tracking-[0.3em] text-[10px] px-12 py-5 font-black">View Reference Document</button>
+        </motion.div>
+      </div>
 
-                <AnimatePresence>
-                   {nodes.map((node, i) => (
-                      <motion.div 
-                        key={node.id} layout initial={{scale:0.9, opacity:0}} animate={{scale:1, opacity:1}} 
-                        onClick={(e) => {e.stopPropagation(); setSelectedId(node.id)}}
-                        className={`w-full relative group cursor-pointer transition-all ${selectedId === node.id ? 'ring-2 ring-indigo-500/50 rounded-xl bg-indigo-500/5' : 'hover:bg-white/5 hover:rounded-xl ring-1 ring-white/0 hover:ring-white/10'}`}
-                        style={{ padding: '0.5rem' }}
-                      >
-                         {/* Visual Representation */}
-                         {node.type === 'TITLE' && <h1 style={{ color: node.color, fontSize: node.size }} className="text-center font-black tracking-tighter m-0">{node.text}</h1>}
-                         {node.type === 'TEXT' && <p style={{ color: node.color, fontSize: node.size }} className="text-center leading-relaxed m-0 font-medium">{node.text}</p>}
-                         {node.type === 'BUTTON' && <div className="flex justify-center"><button style={{ background: node.bg, color: node.color }} className="px-8 py-3 rounded-full font-black text-sm shadow-lg pointer-events-none">{node.text}</button></div>}
-                         {node.type === 'CARD' && <div style={{ background: node.bg, borderRadius: node.radius, border: `1px solid ${node.border}` }} className="w-full h-32"/>}
-                         {node.type === 'SPACER' && <div style={{ height: node.height }} className="w-full flex items-center justify-center text-[10px] text-slate-800 font-black tracking-widest uppercase">Spacer</div>}
-                         
-                         {/* Node Helper Controls */}
-                         <div className={`absolute -right-12 top-0 flex flex-col gap-1 opacity-0 group-hover:opacity-100 transition-opacity z-10`}>
-                            <button onClick={(e) => {e.stopPropagation(); moveNode(node.id, -1)}} className="w-8 h-8 rounded-lg bg-slate-900 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors">↑</button>
-                            <button onClick={(e) => {e.stopPropagation(); moveNode(node.id, 1)}} className="w-8 h-8 rounded-lg bg-slate-900 border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors">↓</button>
-                            <button onClick={(e) => {e.stopPropagation(); deleteNode(node.id)}} className="w-8 h-8 rounded-lg bg-rose-500/10 border border-rose-500/20 flex items-center justify-center text-rose-500 hover:bg-rose-500 hover:text-white transition-colors"><Trash2 size={12}/></button>
-                         </div>
-                      </motion.div>
-                   ))}
-                </AnimatePresence>
-             </div>
-          </div>
-
-          {/* PROPERTIES SIDEBAR */}
-          <div className="w-80 border-l border-white/5 p-8 flex flex-col gap-8 bg-black/20 overflow-y-auto">
-             <div className="space-y-6">
-                <h3 className="text-[10px] font-black uppercase tracking-widest text-slate-500 flex items-center gap-2"><Database size={12}/> App Meta</h3>
-                <div className="space-y-4">
-                   <div>
-                      <label className="text-[9px] font-black uppercase text-slate-600 block mb-2">Display Name</label>
-                      <input value={appName} onChange={e=>setAppName(e.target.value)} className="w-full bg-[#151518] border border-white/5 rounded-xl py-2 px-3 text-xs outline-none focus:border-indigo-500" placeholder="My App" />
-                   </div>
-                   <div>
-                      <label className="text-[9px] font-black uppercase text-slate-600 block mb-2">Developer</label>
-                      <input value={developer} onChange={e=>setDeveloper(e.target.value)} className="w-full bg-[#151518] border border-white/5 rounded-xl py-2 px-3 text-xs outline-none focus:border-indigo-500" placeholder="Your Name" />
-                   </div>
-                </div>
-             </div>
-
-             <AnimatePresence mode="wait">
-                {selNode ? (
-                   <motion.div initial={{x:20, opacity:0}} animate={{x:0, opacity:1}} exit={{x:20, opacity:0}} key={selNode.id} className="space-y-6">
-                      <h3 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 flex items-center gap-2 border-t border-white/5 pt-6"><Settings2 size={12}/> {NODE_TYPES[selNode.type].n} Settings</h3>
-                      
-                      <div className="space-y-4">
-                         {(selNode.text !== undefined) && (
-                            <div>
-                               <label className="text-[9px] font-black uppercase text-slate-600 block mb-2">Content Text</label>
-                               <textarea value={selNode.text} onChange={e=>updateNode(selNode.id, {text: e.target.value})} className="w-full bg-[#151518] border border-white/5 rounded-xl py-2 px-3 text-xs outline-none focus:border-indigo-500 resize-none h-20" />
-                            </div>
-                         )}
-                         {(selNode.color !== undefined) && (
-                            <div>
-                               <label className="text-[9px] font-black uppercase text-slate-600 block mb-2">Text Color</label>
-                               <input type="color" value={selNode.color} onChange={e=>updateNode(selNode.id, {color: e.target.value})} className="w-full h-8 bg-transparent border-none outline-none cursor-pointer" />
-                            </div>
-                         )}
-                         {(selNode.size !== undefined) && (
-                            <div>
-                               <label className="text-[9px] font-black uppercase text-slate-600 block mb-2">Text Size</label>
-                               <input type="text" value={selNode.size} onChange={e=>updateNode(selNode.id, {size: e.target.value})} className="w-full bg-[#151518] border border-white/5 rounded-xl py-2 px-3 text-xs outline-none focus:border-indigo-500" />
-                            </div>
-                         )}
-                         {(selNode.bg !== undefined) && (
-                            <div>
-                               <label className="text-[9px] font-black uppercase text-slate-600 block mb-2">Background Color</label>
-                               <input type="color" value={selNode.bg} onChange={e=>updateNode(selNode.id, {bg: e.target.value})} className="w-full h-8 bg-transparent border-none outline-none cursor-pointer" />
-                            </div>
-                         )}
-                         {(selNode.action !== undefined) && (
-                            <div>
-                               <label className="text-[9px] font-black uppercase text-slate-600 block mb-2">Click Action (JS)</label>
-                               <input value={selNode.action} onChange={e=>updateNode(selNode.id, {action: e.target.value})} className="w-full bg-[#151518] border border-white/5 rounded-xl py-2 px-3 text-xs font-mono outline-none focus:border-indigo-500" />
-                            </div>
-                         )}
-                         {(selNode.height !== undefined) && (
-                            <div>
-                               <label className="text-[9px] font-black uppercase text-slate-600 block mb-2">Spacer Height</label>
-                               <input value={selNode.height} onChange={e=>updateNode(selNode.id, {height: e.target.value})} className="w-full bg-[#151518] border border-white/5 rounded-xl py-2 px-3 text-xs outline-none focus:border-indigo-500" />
-                            </div>
-                         )}
-                      </div>
-                   </motion.div>
-                ) : (
-                   <div className="flex-1 flex flex-col items-center justify-center text-slate-600 text-center border-t border-white/5 pt-6 gap-4">
-                      <MousePointer2 size={32} className="opacity-10"/>
-                      <p className="text-[11px] font-medium leading-relaxed">Select a node on the stage to edit its properties.</p>
-                   </div>
-                )}
-             </AnimatePresence>
-          </div>
-       </div>
+      <footer className="mt-40 pt-20 border-t border-white/5 text-center px-6">
+        <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] mb-4">Developers // Lithium Project</p>
+        <p className="text-white/40 text-xs italic">Building the infrastructure for web-native computing.</p>
+      </footer>
     </div>
   );
 }

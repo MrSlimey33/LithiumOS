@@ -141,7 +141,7 @@ export function FileExplorerApp({ useVDisk }) {
                       <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
                       <div className="flex items-center gap-6 relative z-10">
                          <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${file.type==='code'?'bg-indigo-500/10 text-indigo-400':file.type==='image'?'bg-rose-500/10 text-rose-400':'bg-white/5 text-white/20'}`}>
-                            {file.type === 'image' ? <ImageIcon size={22}/> : <Layers size={22}/>}
+                            {file.type === 'image' ? <ImageIcon size={22}/> : file.type === 'code' ? <Layers size={22}/> : <FileText size={22}/>}
                          </div>
                          <div>
                             <div className="text-sm font-black uppercase tracking-tight text-white group-hover:text-cyan-400 transition-colors">{file.name}</div>
