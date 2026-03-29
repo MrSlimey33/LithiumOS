@@ -64,15 +64,47 @@ function useVDisk(key, init) {
 }
 
 // ===== HYPER-KINETIC WINDOW (GLASS 4.0) =====
-function Window({ w, focus, close, min, max, children, constraintsRef, activeReg }) {
+function Window({ w, focus, close, min, max, resize, children, constraintsRef, activeReg }) {
   if (w.min) return null;
   const Ic = w.ic;
   const reg = activeReg[w.id] || { n: 'Unknown' };
   
+  // Refined Kinetic Drag & Resize
   const x = useMotionValue(w.x);
   const y = useMotionValue(w.y);
-  const rotateX = useTransform(y, [0, 1000], [2, -2]);
-  const rotateY = useTransform(x, [0, 1000], [-2, 2]);
+  
+  // Sync motion values with state when dragging
+  useEffect(() => {
+    x.set(w.x);
+    y.set(w.y);
+  }, [w.x, w.y, x, y]);
+
+  const rotateX = useTransform(y, [0, 1000], [4, -4]); 
+  const rotateY = useTransform(x, [0, 1000], [-4, 4]);
+
+  const handleResize = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const startX = e.clientX;
+    const startY = e.clientY;
+    const startW = w.w;
+    const startH = w.h;
+
+    const onMove = (moveEvent) => {
+      const nw = Math.max(400, startW + (moveEvent.clientX - startX));
+      const nh = Math.max(300, startH + (moveEvent.clientX - startX) * (startH/startW)); // Aspect ratio or free? Let's do free.
+      const nhFree = Math.max(300, startH + (moveEvent.clientY - startY));
+      resize(w.id, nw, nhFree);
+    };
+
+    const onUp = () => {
+      window.removeEventListener('mousemove', onMove);
+      window.removeEventListener('mouseup', onUp);
+    };
+
+    window.addEventListener('mousemove', onMove);
+    window.addEventListener('mouseup', onUp);
+  };
 
   return (
     <motion.div 
@@ -86,13 +118,17 @@ function Window({ w, focus, close, min, max, children, constraintsRef, activeReg
         borderRadius: w.max ? '0px' : '28px'
       }}
       exit={{ opacity: 0, scale: 0.95, filter: 'blur(20px)' }}
-      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+      transition={{ type: "spring", stiffness: 400, damping: 35 }}
       drag={!w.max}
       dragConstraints={constraintsRef}
       dragMomentum={false}
+      onDrag={(e, info) => {
+        x.set(info.point.x);
+        y.set(info.point.y);
+      }}
       onDragStart={() => focus(w.id)}
       onMouseDown={() => focus(w.id)}
-      style={{ zIndex: w.z, position: 'absolute', rotateX, rotateY, perspective: 1000 }}
+      style={{ zIndex: w.z, position: 'absolute', rotateX, rotateY, perspective: 1000, x, y }}
       className="flex flex-col overflow-hidden hyperglass-pro refractive-border"
     >
       <div className="h-12 flex items-center justify-between px-6 w-full cursor-grab active:cursor-grabbing shrink-0 select-none border-b border-white/5 bg-white/5">
@@ -107,6 +143,16 @@ function Window({ w, focus, close, min, max, children, constraintsRef, activeReg
         <div className="w-16" />
       </div>
       <div className="flex-1 overflow-hidden relative bg-black/60" onMouseDown={e => e.stopPropagation()}>{children}</div>
+      
+      {/* Resize Handle */}
+      {!w.max && (
+        <div 
+          onMouseDown={handleResize}
+          className="absolute bottom-0 right-0 w-6 h-6 cursor-nwse-resize z-50 flex items-center justify-center group"
+        >
+          <div className="w-1 h-1 bg-white/20 rounded-full group-hover:bg-cyan-400 transition-colors" />
+        </div>
+      )}
     </motion.div>
   );
 }
@@ -145,6 +191,8 @@ export default function LithiumOS({ previewMode = false }) {
   const [activeMobileApp, setActiveMobileApp] = useState(null);
   const containerRef = useRef(null);
   const [showControlCenter, setShowControlCenter] = useState(false);
+  const [showTelemetry, setShowTelemetry] = useState(true);
+  const [telemetry, setTelemetry] = useState({ bat: 100, net: 8.4, mem: 42 });
   
   const [extAppsMap, setExtAppsMap] = useState(() => {
      try { return JSON.parse(window.localStorage.getItem('LITHIUM_ext_apps') || '{}'); } catch(e) { return {}; }
@@ -181,6 +229,25 @@ export default function LithiumOS({ previewMode = false }) {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
+  useEffect(() => {
+     const up = async () => {
+        const t = { bat: 100, net: (Math.random() * 5 + 5).toFixed(1), mem: Math.floor(Math.random() * 20 + 30) };
+        try {
+           if(navigator.getBattery) {
+              const b = await navigator.getBattery();
+              t.bat = Math.floor(b.level * 100);
+           }
+           if(navigator.connection) {
+              t.net = navigator.connection.downlink || t.net;
+           }
+        } catch(e){}
+        setTelemetry(t);
+     };
+     up();
+     const i = setInterval(up, 5000);
+     return () => clearInterval(i);
+  }, []);
+
   useEffect(() => { const t = setInterval(() => setTime(new Date()), 1000); return () => clearInterval(t); }, []);
   
   const focusApp = useCallback((id) => {
@@ -207,6 +274,7 @@ export default function LithiumOS({ previewMode = false }) {
   const closeApp = (id) => setWins(ws => ws.filter(w => w.id !== id));
   const minApp = (id) => setWins(ws => ws.map(w => w.id === id ? { ...w, min: true } : w));
   const maxApp = (id) => setWins(ws => ws.map(w => w.id === id ? { ...w, max: !w.max, x: w.max ? w.x : 0, y: w.max ? w.y : 28 } : w));
+  const resizeApp = (id, w, h) => setWins(ws => ws.map(ow => ow.id === id ? { ...ow, w, h } : ow));
 
   const renderCurrentApp = (id) => {
     const AppComp = activeReg[id]?.comp;
@@ -328,7 +396,13 @@ export default function LithiumOS({ previewMode = false }) {
                       <span className="text-[8px] font-bold text-white/30 uppercase tracking-widest mt-1">{time.toLocaleDateString([], { weekday: 'short' })}</span>
                    </div>
                    <div className="h-4 w-[1px] bg-white/10" />
-                   <div className="flex items-center gap-4 text-white/40"><Wifi size={14} /><Battery size={16} className="text-emerald-400 opacity-70" /></div>
+                   <div className="flex items-center gap-4 text-white/40">
+                      <Wifi size={14} className={telemetry.net > 2 ? 'text-cyan-400' : ''}/>
+                      <div className="flex items-center gap-1.5 cursor-pointer pointer-events-auto" onClick={() => setShowTelemetry(!showTelemetry)}>
+                         <Battery size={16} className={telemetry.bat < 20 ? 'text-rose-500' : 'text-emerald-400'} />
+                         <span className="text-[10px] font-black">{telemetry.bat}%</span>
+                      </div>
+                   </div>
                 </motion.div>
              </div>
 
@@ -337,7 +411,7 @@ export default function LithiumOS({ previewMode = false }) {
                 <AnimatePresence>
                    {wins.map((w) => (
                       <div key={w.id} className="pointer-events-auto absolute inset-0">
-                         <Window w={w} focus={focusApp} close={closeApp} min={minApp} max={maxApp} constraintsRef={containerRef} activeReg={activeReg}>{renderCurrentApp(w.id)}</Window>
+                         <Window w={w} focus={focusApp} close={closeApp} min={minApp} max={maxApp} resize={resizeApp} constraintsRef={containerRef} activeReg={activeReg}>{renderCurrentApp(w.id)}</Window>
                       </div>
                    ))}
                 </AnimatePresence>
@@ -360,41 +434,63 @@ export default function LithiumOS({ previewMode = false }) {
           </div>
 
           {/* 3. RIGHT RAIL */}
-          <motion.div initial={{ x: 100 }} animate={{ x: 0 }} className="w-80 h-full p-8 flex flex-col gap-6 z-[400] hyperglass-pro border-l border-white/5 bg-black/20">
-             <h3 className="text-[10px] font-black tracking-[0.5em] uppercase text-white/20 mb-2 px-1">Telemetry</h3>
-             <div className="space-y-5">
-                <div className="hyperglass-pro p-6 rounded-[2rem] border border-white/5 bg-white/[0.01]">
-                   <div className="flex justify-between items-center mb-6"><span className="text-[9px] font-black text-cyan-400">ATMO.SERVICE</span><CloudSun size={18} className="text-white/20" /></div>
-                   <div className="text-5xl font-black text-white">24°</div>
-                </div>
-                <div className="hyperglass-pro p-6 rounded-[2rem] border border-white/5 bg-white/[0.01]">
-                   <div className="flex justify-between items-center mb-6"><span className="text-[9px] font-black text-rose-500">KERNEL.LOAD</span><Activity size={18} className="text-white/20" /></div>
-                   <div className="flex items-end gap-2"><span className="text-5xl font-black text-white">42</span><span className="text-sm font-black text-white/20 mb-2 uppercase">Cycles</span></div>
-                </div>
-             </div>
-             <div className="flex-1" />
-             <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02] flex items-center justify-between"><div className="flex items-center gap-3"><Shield size={16} className="text-emerald-500" /><span className="text-[9px] font-bold text-white/40 uppercase">Safe Mode</span></div><div className="w-2 h-2 rounded-full bg-emerald-500" /></div>
-          </motion.div>
+          <AnimatePresence>
+             {showTelemetry && (
+                <motion.div 
+                  initial={{ x: 320, opacity: 0 }} 
+                  animate={{ x: 0, opacity: 1 }} 
+                  exit={{ x: 320, opacity: 0 }}
+                  transition={{ type: 'spring', damping: 25, stiffness: 200 }}
+                  className="w-80 h-full p-8 flex flex-col gap-6 z-[400] hyperglass-pro border-l border-white/5 bg-black/20 shrink-0"
+                >
+                   <div className="flex justify-between items-center px-1">
+                      <h3 className="text-[10px] font-black tracking-[0.5em] uppercase text-white/20">Telemetry</h3>
+                      <button onClick={() => setShowTelemetry(false)} className="text-white/20 hover:text-white transition-colors"><X size={14}/></button>
+                   </div>
+                   <div className="space-y-5">
+                      <div className="hyperglass-pro p-6 rounded-[2rem] border border-white/5 bg-white/[0.01]">
+                         <div className="flex justify-between items-center mb-6"><span className="text-[9px] font-black text-cyan-400">ATMO.SERVICE</span><CloudSun size={18} className="text-white/20" /></div>
+                         <div className="text-5xl font-black text-white">24°</div>
+                      </div>
+                      <div className="hyperglass-pro p-6 rounded-[2rem] border border-white/5 bg-white/[0.01]">
+                         <div className="flex justify-between items-center mb-6"><span className="text-[9px] font-black text-rose-500">KERNEL.LOAD</span><Activity size={18} className="text-white/20" /></div>
+                         <div className="flex items-end gap-2"><span className="text-5xl font-black text-white">{telemetry.mem}</span><span className="text-sm font-black text-white/20 mb-2 uppercase">Cycles</span></div>
+                      </div>
+                      <div className="hyperglass-pro p-6 rounded-[2rem] border border-white/5 bg-white/[0.01]">
+                         <div className="flex justify-between items-center mb-4"><span className="text-[9px] font-black text-emerald-500 uppercase">Net Stream</span><Signal size={18} className="text-white/20" /></div>
+                         <div className="flex items-center gap-3">
+                            <span className="text-2xl font-black text-white">{telemetry.net}</span>
+                            <span className="text-[10px] font-bold text-white/20 uppercase tracking-widest mt-1">Mb/s</span>
+                         </div>
+                      </div>
+                   </div>
+                   <div className="flex-1" />
+                   <div className="p-4 rounded-2xl border border-white/5 bg-white/[0.02] flex items-center justify-between"><div className="flex items-center gap-3"><Shield size={16} className="text-emerald-500" /><span className="text-[9px] font-bold text-white/40 uppercase">Safe Mode</span></div><div className="w-2 h-2 rounded-full bg-emerald-500" /></div>
+                </motion.div>
+             )}
+          </AnimatePresence>
        </div>
 
        {/* LAUNCHPAD OVERLAY */}
        <AnimatePresence>
           {startOpen && !locked && (
-             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[1000] flex flex-col items-center justify-center p-20 bg-[#020205]/90 backdrop-blur-[100px]">
-                <div className="w-full max-w-5xl grid grid-cols-4 sm:grid-cols-6 gap-16 justify-items-center">
-                   {Object.keys(activeReg).map((id) => {
-                      const app = activeReg[id]; const Ic = app.ic || Search;
-                      return (
-                        <motion.div key={`neu-${id}`} whileHover={{ scale: 1.1, y: -15 }} whileTap={{ scale: 0.9 }} className="flex flex-col items-center gap-5 cursor-pointer group" onClick={() => launchApp(id)}>
-                           <div className={`w-28 h-28 rounded-[35%] flex items-center justify-center bg-gradient-to-br ${app.c} border border-white/10 shadow-2xl transition-all group-hover:shadow-cyan-500/20`}>
-                              <Ic size={48} className={app.t} />
-                           </div>
-                           <span className="text-[11px] font-black tracking-[0.3em] uppercase text-white/30 group-hover:text-cyan-400 transition-colors">{app.n}</span>
-                        </motion.div>
-                      );
-                   })}
+             <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="absolute inset-0 z-[1000] flex flex-col items-center p-20 bg-[#020205]/95 backdrop-blur-[100px] overflow-hidden">
+                <div className="w-full max-w-6xl h-full overflow-y-auto scrollbar-hide py-20 px-10">
+                   <div className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-16 justify-items-center">
+                      {Object.keys(activeReg).map((id) => {
+                         const app = activeReg[id]; const Ic = app.ic || Search;
+                         return (
+                           <motion.div key={`neu-${id}`} whileHover={{ scale: 1.1, y: -15 }} whileTap={{ scale: 0.9 }} className="flex flex-col items-center gap-5 cursor-pointer group" onClick={() => launchApp(id)}>
+                              <div className={`w-28 h-28 rounded-[35%] flex items-center justify-center bg-gradient-to-br ${app.c} border border-white/10 shadow-2xl transition-all group-hover:shadow-cyan-500/20`}>
+                                 <Ic size={48} className={app.t} />
+                              </div>
+                              <span className="text-[11px] font-black tracking-[0.3em] uppercase text-white/30 group-hover:text-cyan-400 transition-colors text-center">{app.n}</span>
+                           </motion.div>
+                         );
+                      })}
+                   </div>
                 </div>
-                <motion.button whileHover={{ scale: 1.1, rotate: 90 }} onClick={() => setStartOpen(false)} className="fixed top-12 left-12 w-16 h-16 rounded-full hyperglass-pro flex items-center justify-center text-white/30 border border-white/10 shadow-2xl"><X size={32} /></motion.button>
+                <motion.button whileHover={{ scale: 1.1, rotate: 90 }} onClick={() => setStartOpen(false)} className="fixed top-12 left-12 w-16 h-16 rounded-full hyperglass-pro flex items-center justify-center text-white/30 border border-white/10 shadow-2xl z-[1100]"><X size={32} /></motion.button>
              </motion.div>
           )}
        </AnimatePresence>
