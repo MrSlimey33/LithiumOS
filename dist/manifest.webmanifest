@@ -1,0 +1,19 @@
+{
+  "name": "LithiumOS",
+  "short_name": "Lithium",
+  "start_url": "/LithiumOS/#/station",
+  "scope": "/LithiumOS/",
+  "display": "standalone",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "./favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "orientation": "portrait",
+  "description": "The minimalist spatial operating system for the high-end solo dev."
+}
