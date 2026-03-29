@@ -1,0 +1,46 @@
+
+C:\Users\liamj\OneDrive - Personal\Documents\LithiumOS\src\LithiumOS.jsx
+   38:151  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               no-unused-vars
+   39:195  error    'error' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               no-unused-vars
+   39:201  error    Empty block statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           no-empty
+  125:34   warning  Compilation Skipped: The 'eval' function is not supported
+
+Eval is an anti-pattern in JavaScript, and the code executed cannot be evaluated by React Compiler.
+
+  123 |       playSound('click', e);
+  124 |       let res = `> ${inp}`;
+> 125 |       try { res += `\n< ${String(eval(inp))}`; } catch(err) { res += `\n< Err: ${err.message}`; }
+      |                                  ^^^^ The 'eval' function is not supported
+  126 |       if(inp === 'clear') setLog([]); else setLog([...log, res]);
+  127 |       setInp('');
+  128 |     }
+
+                                                                                                                                                                                                                                                                                                                                                                                                                       react-hooks/unsupported-syntax
+  154:211  warning  The ref value 'vRef.current' will likely have changed by the time this effect cleanup function runs. If this ref points to a node rendered by React, copy 'vRef.current' to a variable inside the effect, and use that variable in the cleanup function                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         react-hooks/exhaustive-deps
+  171:123  warning  Compilation Skipped: The 'eval' function is not supported
+
+Eval is an anti-pattern in JavaScript, and the code executed cannot be evaluated by React Compiler.
+
+  169 | function CalculatorApp() {
+  170 |   const [calc, setCalc] = useState('0');
+> 171 |   const press = (btn, e) => { playSound('click',e); if(btn==='C') setCalc('0'); else if(btn==='=') { try { setCalc(String(eval(calc))) } catch { setCalc('ERR') } } else setCalc(calc==='0'||calc==='ERR'?btn:calc+btn); };
+      |                                                                                                                           ^^^^ The 'eval' function is not supported
+  172 |   return (
+  173 |     <div className="w-full h-full bg-slate-50 flex flex-col pb-4">
+  174 |       <div className="flex-1 bg-white p-6 flex items-end justify-end text-right border-b border-slate-100 shadow-sm z-10 break-all text-4xl text-slate-800 font-light tracking-tight">{calc}</div>
+
+  react-hooks/unsupported-syntax
+  238:81   error    Error: Cannot call impure function during render
+
+`Date.now` is an impure function. Calling an impure function can produce unstable results that update unpredictably when the component happens to re-render. (https://react.dev/reference/rules/components-and-hooks-must-be-pure#components-and-hooks-must-be-idempotent).
+
+  236 |     if(e) playSound('click', e);
+  237 |     const ex = wins.find(w => w.id === id);
+> 238 |     if (ex) { focusApp(id); } else { setWins([...wins, { id, ic: REG[id].ic, z: Date.now(), min: false, max: false, x: 100 + wins.length*30, y: 100 + wins.length*30, w: 700, h: 500 }]); }
+      |                                                                                 ^^^^^^^^^^ Cannot call impure function
+  239 |     setStartOpen(false);
+  240 |   };
+  241 |   const closeApp = (id) => setWins(ws => ws.filter(w => w.id !== id));                                                                                     react-hooks/purity
+
+✖ 7 problems (4 errors, 3 warnings)
+
