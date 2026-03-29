@@ -1,54 +1,88 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { ChevronLeft, Cpu, Globe, Zap } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Cpu, Zap, Shield, Globe, Layers, Wind, ChevronRight } from 'lucide-react';
 
 export default function Technology() {
-  const navigate = useNavigate();
   return (
-    <div className="min-h-screen bg-slate-900 text-slate-200 font-sans selection:bg-cyan-500/30 selection:text-white">
+    <div className="min-h-screen bg-black text-white font-sans selection:bg-blue-500/30 overflow-x-hidden">
+       {/* HERO SECTION */}
+       <section className="relative pt-40 pb-20 px-6 text-center overflow-hidden">
+          <motion.div initial={{opacity:0, scale:1.1}} animate={{opacity:0.3, scale:1}} transition={{duration:2}} className="absolute inset-x-0 top-0 h-[70vh] -z-10">
+             <img 
+               src="/LithiumOS/src/lithium_node_engine_liquid_1774731943765.png" 
+               alt="Engine Core" 
+               className="w-full h-full object-cover" 
+               onError={(e) => {
+                 e.target.src = "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&q=80&w=2072";
+               }}
+             />
+             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/40 to-black" />
+          </motion.div>
 
-      <header className="relative py-40 flex flex-col items-center text-center px-4 overflow-hidden isolate">
-         <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-[0.05] pointer-events-none mix-blend-overlay" />
-         <motion.div initial={{opacity:0, scale:0.9, filter:'blur(10px)'}} animate={{opacity:1, scale:1, filter:'blur(0px)'}} transition={{duration:1.5, ease:'easeOut'}} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-gradient-to-br from-indigo-500/20 to-purple-800/20 rounded-full blur-[100px] -z-10" />
-         
-         <motion.h1 initial={{y:30, opacity:0}} animate={{y:0, opacity:1}} transition={{duration:1, delay:0.2}} className="text-6xl md:text-8xl font-medium tracking-tighter mb-6 text-white text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400 pb-2">Future Hardware</motion.h1>
-         <motion.p initial={{y:20, opacity:0}} animate={{y:0, opacity:1}} transition={{duration:1, delay:0.4}} className="text-xl md:text-2xl text-slate-400 max-w-2xl font-light">The actual physical architecture of tomorrow. Because software gets boring.</motion.p>
-      </header>
+          <motion.div initial={{y:40, opacity:0}} animate={{y:0, opacity:1}} transition={{duration:1}} className="max-w-4xl mx-auto relative z-10">
+             <h1 className="text-6xl md:text-[100px] font-black tracking-tighter leading-[0.85] mb-8 shimmer-text">
+                The Logic<br/>Engine.
+             </h1>
+             <p className="text-xl md:text-2xl text-slate-400 font-medium max-w-2xl mx-auto mb-12 leading-relaxed tracking-tight">
+                Standard containers are too heavy. Iframes are too fragile. We built the Node Standard—a secure, lightweight execution layer for the modern web.
+             </p>
+          </motion.div>
+       </section>
 
-      <section className="max-w-7xl mx-auto px-6 md:px-12 py-20 grid grid-cols-1 md:grid-cols-2 gap-10">
-         <motion.div initial={{opacity:0, y:50}} whileInView={{opacity:1, y:0}} viewport={{once:true}} transition={{duration:0.8}} className="glass-dark rounded-[2.5rem] p-10 border border-white/10 relative overflow-hidden group">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-[80px] group-hover:bg-cyan-500/20 transition-colors" />
-            <Globe className="text-cyan-400 mb-8" size={48} />
-            <h2 className="text-4xl font-bold tracking-tight text-white mb-4">Lithium Glass</h2>
-            <p className="text-slate-400 leading-relaxed text-lg font-light mb-8">An augmented reality spatial interface powered natively through a lightweight WebXR compositor. Interact with your web-node apps in true 3D space.</p>
-            <div className="text-xs font-bold tracking-widest text-cyan-500 uppercase px-4 py-2 border border-cyan-500/30 rounded-full inline-block">Estimated R&D 2028</div>
-         </motion.div>
+       {/* TECHNICAL SPECS */}
+       <section className="py-32 px-6 md:px-12 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-32">
+             <motion.div initial={{x:-40, opacity:0}} whileInView={{x:0, opacity:1}} className="glass-liquid rounded-[4rem] p-12 md:p-20 group">
+                <Wind className="text-blue-500 mb-8 group-hover:rotate-12 transition-transform" size={48} />
+                <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-6 leading-tight">Zero-Latency<br/>Virtualization.</h2>
+                <p className="text-lg text-slate-400 leading-relaxed font-medium">Lithium uses a custom `srcDoc` orchestration engine that bypasses traditional network overhead. Nodes boot in under 5ms, sharing the OS core's performance without compromising security.</p>
+             </motion.div>
 
-         <motion.div initial={{opacity:0, y:50}} whileInView={{opacity:1, y:0}} viewport={{once:true}} transition={{duration:0.8, delay:0.2}} className="glass-dark rounded-[2.5rem] p-10 border border-white/10 relative overflow-hidden group">
-            <div className="absolute bottom-0 right-0 w-64 h-64 bg-fuchsia-500/10 rounded-full blur-[80px] group-hover:bg-fuchsia-500/20 transition-colors" />
-            <Zap className="text-fuchsia-400 mb-8" size={48} />
-            <h2 className="text-4xl font-bold tracking-tight text-white mb-4">Lithium Quant</h2>
-            <p className="text-slate-400 leading-relaxed text-lg font-light mb-8">Harnessing WebGPU compute shaders to run simulated quantum entanglement routines directly in the browser node.</p>
-            <div className="text-xs font-bold tracking-widest text-fuchsia-500 uppercase px-4 py-2 border border-fuchsia-500/30 rounded-full inline-block">Estimated R&D 2029</div>
-         </motion.div>
+             <motion.div initial={{x:40, opacity:0}} whileInView={{x:0, opacity:1}} className="glass-liquid rounded-[4rem] p-12 md:p-20 group">
+                <Shield className="text-indigo-500 mb-8 group-hover:scale-110 transition-transform" size={48} />
+                <h2 className="text-4xl md:text-5xl font-black tracking-tighter mb-6 leading-tight">Hardened<br/>Sandboxing.</h2>
+                <p className="text-lg text-slate-400 leading-relaxed font-medium">Every Node is isolated using a strict manifest-based policy. No cross-origin access, restricted local storage, and delegated event handling keep the OS core invisible to community logic.</p>
+             </motion.div>
+          </div>
 
-         <motion.div initial={{opacity:0, y:50}} whileInView={{opacity:1, y:0}} viewport={{once:true}} transition={{duration:0.8, delay:0.4}} className="glass-dark rounded-[2.5rem] p-10 border border-white/10 relative overflow-hidden group col-span-1 md:col-span-2 text-center md:text-left md:flex items-center gap-10">
-            <div className="w-full md:w-1/3 aspect-square bg-[#151a25] rounded-[2rem] border border-[#2a2f3a] flex items-center justify-center shadow-inner mb-6 md:mb-0 relative overflow-hidden">
-               <Cpu className="text-rose-500" size={64}/>
-               <div className="absolute inset-0 bg-rose-500/10 mix-blend-overlay animate-pulse" />
-            </div>
-            <div className="flex-1">
-               <h2 className="text-4xl font-bold tracking-tight text-white mb-4">Neural Link Beta</h2>
-               <p className="text-slate-400 leading-relaxed text-lg font-light mb-8 max-w-2xl">Currently in testing. I connected a Raspberry Pi to my cerebral cortex. Mild headaches reported.</p>
-               <div className="text-xs font-bold tracking-widest text-rose-500 uppercase px-4 py-2 border border-rose-500/30 rounded-full inline-block">Testing Phase</div>
-            </div>
-         </motion.div>
-      </section>
+          <motion.div initial={{y:40, opacity:0}} whileInView={{y:0, opacity:1}} className="glass-liquid rounded-[4rem] p-12 md:p-20 mb-32 relative overflow-hidden group">
+             <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-12 text-center">
+                <div>
+                   <h3 className="text-6xl md:text-7xl font-black text-blue-500 mb-2 tracking-tighter">0.0ms</h3>
+                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Network Latency</p>
+                </div>
+                <div>
+                   <h3 className="text-6xl md:text-7xl font-black text-indigo-500 mb-2 tracking-tighter">AES</h3>
+                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Vault Encryption</p>
+                </div>
+                <div>
+                   <h3 className="text-6xl md:text-7xl font-black text-white mb-2 tracking-tighter">100%</h3>
+                   <p className="text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">Native Context</p>
+                </div>
+             </div>
+             <div className="absolute inset-0 bg-blue-600/5 -z-10 blur-[100px] pointer-events-none" />
+          </motion.div>
 
-      <footer className="text-center py-20 text-slate-500 font-medium cursor-pointer" onClick={()=>navigate('/')}>
-         <div className="flex items-center justify-center gap-2 hover:text-white transition-colors"><ChevronLeft size={16}/> Back to Home</div>
-      </footer>
+          {/* PERFORMANCE GRID */}
+          <div className="text-center py-20">
+             <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-16 shimmer-text">Engine DNA.</h2>
+             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {['React 19', 'Tailwind v4', 'Framer Motion', 'Vite 6', 'Lucide Icons', 'GitHub API', 'Standard JS', 'Node Schema'].map((tech) => (
+                   <div key={tech} className="liquid-well py-8 rounded-[2rem] text-xs font-black uppercase tracking-[0.3em] text-slate-500 group hover:text-white hover:bg-white/5 transition-all border border-white/5">
+                      {tech}
+                   </div>
+                ))}
+             </div>
+          </div>
+       </section>
+
+       {/* FOOTER */}
+       <footer className="py-24 px-6 border-t border-white/5 text-center mt-32">
+          <div className="flex justify-center items-center gap-2 mb-4 text-[10px] font-black uppercase tracking-[0.5em] text-slate-700">
+             <Cpu size={14}/> Integrated Engine Core / v2.0
+          </div>
+          <p className="text-[10px] font-bold text-slate-800 uppercase tracking-[0.4em]">Lithium Technology Group © 2026</p>
+       </footer>
     </div>
-  )
+  );
 }
