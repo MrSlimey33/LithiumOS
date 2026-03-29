@@ -88,6 +88,27 @@
   .safe-bottom {
     padding-bottom: env(safe-area-inset-bottom);
   }
+
+  /* SPATIAL GLASS 3.0 */
+  .spatial-mesh {
+    background: radial-gradient(at 0% 0%, #000 0%, transparent 50%),
+                radial-gradient(at 100% 0%, #0c0032 0%, transparent 50%),
+                radial-gradient(at 100% 100%, #190033 0%, transparent 50%),
+                radial-gradient(at 0% 100%, #000c1e 0%, transparent 50%);
+    background-size: 200% 200%;
+    animation: mesh-move 120s linear infinite;
+  }
+
+  @keyframes mesh-move {
+    0% { background-position: 0% 0%; }
+    50% { background-position: 100% 100%; }
+    100% { background-position: 0% 0%; }
+  }
+
+  .refraction-tile {
+    @apply bg-white/[0.03] backdrop-blur-[64px] border border-white/10 shadow-[0_24px_48px_-12px_rgba(0,0,0,0.5)];
+    box-shadow: inset 0 0.5px 1px rgba(255, 255, 255, 0.4), 0 20px 50px rgba(0,0,0,0.3);
+  }
 }
 
 /* Animations */
