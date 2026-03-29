@@ -1,6 +1,0 @@
-
-C:\Users\liamj\OneDrive - Personal\Documents\LithiumOS\src\LithiumOS.jsx
-  91:174  error  Parsing error: Unexpected token [
-
-✖ 1 problem (1 error, 0 warnings)
-
