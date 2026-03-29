@@ -32,28 +32,27 @@ export function GlobalNav() {
 
   return (
     <>
-      <nav className="fixed top-0 left-0 w-full px-6 md:px-8 py-4 md:py-5 flex items-center justify-between z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800 transition-all font-sans">
-        <div className="flex items-center gap-6 md:gap-10">
-          <Link to="/" className="text-white font-bold tracking-tighter text-xl md:text-2xl flex items-center gap-2 group" onClick={() => setMobileOpen(false)}>
-             <Zap className="text-blue-500 group-hover:rotate-12 transition-transform" size={20} />
-             LITHIUM TECH
+      <nav className="fixed top-0 left-0 w-full px-8 py-5 flex items-center justify-between z-[100] glass-liquid border-b border-white/5 transition-all font-sans">
+        <div className="flex items-center gap-10">
+          <Link to="/" className="text-white font-black tracking-tighter text-2xl flex items-center gap-2 group" onClick={() => setMobileOpen(false)}>
+             <Zap size={22} className="text-white fill-white group-hover:rotate-12 transition-transform shadow-white/20 shadow-lg" />
+             <span className="italic uppercase tracking-tighter shimmer-text">Lithium</span>
           </Link>
-          <div className="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-400">
+          <div className="hidden md:flex items-center gap-10 text-[10px] font-black uppercase tracking-[0.4em] text-slate-500">
              {NAV_LINKS.map(l => (
                <Link key={l.to} to={l.to} className={`hover:text-white transition-colors ${location.pathname === l.to ? 'text-white' : ''}`}>{l.label}</Link>
              ))}
           </div>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
            {id ? (
               <div className="flex items-center gap-3">
-                 <span className="hidden sm:flex text-emerald-400 font-mono text-xs font-bold px-3 py-1 bg-emerald-900/40 border border-emerald-500/50 rounded-full items-center gap-2"><div className="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"/>ID: {id.slice(0,6)}...</span>
-                 <button onClick={()=>navigate('/station')} className="bg-white text-slate-900 px-4 md:px-5 py-2 rounded-full font-bold text-xs md:text-sm tracking-wide shadow-[0_0_15px_rgba(255,255,255,0.3)] hover:scale-105 transition-all">Launch OS</button>
+                 <button onClick={()=>navigate('/station')} className="bg-white text-black px-6 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest shadow-2xl shadow-white/10 hover:scale-105 transition-all active:scale-95">Launch OS</button>
               </div>
            ) : (
-              <button onClick={()=>navigate('/login')} className="text-blue-400 hover:text-white font-bold text-sm tracking-wide transition-colors hidden md:block">Cloud Login →</button>
+              <button onClick={()=>navigate('/login')} className="bg-white text-black px-6 py-2.5 rounded-full font-black text-[10px] uppercase tracking-widest hover:scale-105 transition-all active:scale-95">Cloud Login</button>
            )}
-           <button className="md:hidden w-10 h-10 flex items-center justify-center text-white hover:bg-white/10 rounded-xl transition-colors" onClick={() => setMobileOpen(!mobileOpen)}>
+           <button className="md:hidden w-10 h-10 flex items-center justify-center text-white glass-liquid rounded-xl transition-all" onClick={() => setMobileOpen(!mobileOpen)}>
               {mobileOpen ? <X size={22} /> : <Menu size={22} />}
            </button>
         </div>
@@ -63,23 +62,20 @@ export function GlobalNav() {
       <AnimatePresence>
         {mobileOpen && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.25, ease: [0.16, 1, 0.3, 1] }}
-            className="fixed inset-0 z-40 bg-slate-900/95 backdrop-blur-2xl pt-24 px-8 flex flex-col gap-2 md:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[90] bg-black/95 backdrop-blur-3xl pt-32 px-10 flex flex-col gap-4 md:hidden"
           >
             {NAV_LINKS.map((l, i) => (
               <motion.div key={l.to} initial={{ opacity: 0, x: -20 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }}>
-                <Link to={l.to} onClick={() => setMobileOpen(false)} className={`block py-4 text-2xl font-bold tracking-tight border-b border-slate-800 transition-colors ${location.pathname === l.to ? 'text-blue-400' : 'text-white hover:text-blue-400'}`}>{l.label}</Link>
+                <Link to={l.to} onClick={() => setMobileOpen(false)} className={`block py-5 text-4xl font-black tracking-tighter border-b border-white/5 transition-colors ${location.pathname === l.to ? 'text-white underline decoration-white/20' : 'text-slate-600 hover:text-white'}`}>{l.label}</Link>
               </motion.div>
             ))}
-            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-8">
-              {id ? (
-                <button onClick={() => { navigate('/station'); setMobileOpen(false); }} className="w-full bg-white text-slate-900 py-4 rounded-2xl font-bold text-lg shadow-[0_0_30px_rgba(255,255,255,0.15)]">Launch OS</button>
-              ) : (
-                <button onClick={() => { navigate('/login'); setMobileOpen(false); }} className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-blue-500/30">Cloud Login</button>
-              )}
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 0.3 }} className="mt-12">
+              <button onClick={() => { navigate(id ? '/station' : '/login'); setMobileOpen(false); }} className="w-full bg-white text-black py-6 rounded-full font-black text-xl italic tracking-tighter">
+                {id ? 'Launch Environment' : 'Initialize Vault'}
+              </button>
             </motion.div>
           </motion.div>
         )}
@@ -90,15 +86,15 @@ export function GlobalNav() {
 
 function Footer() {
   return (
-    <footer className="bg-slate-900 border-t border-slate-800 py-12 px-6 text-center font-sans">
-      <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-6">
-        <div className="flex items-center gap-2 text-white font-bold tracking-tighter text-lg">
-          <Zap className="text-blue-500" size={18} /> LITHIUM TECH
+    <footer className="py-24 px-8 border-t border-white/5 text-center bg-black">
+      <div className="max-w-7xl mx-auto flex flex-col items-center gap-12">
+        <div className="flex items-center gap-3 text-white font-black tracking-tighter text-2xl italic">
+          <Zap className="text-white fill-white" size={24} /> LITHIUM
         </div>
-        <div className="flex flex-wrap items-center justify-center gap-6 text-sm font-medium text-slate-500">
+        <div className="flex flex-wrap items-center justify-center gap-12 text-[10px] font-black uppercase tracking-[0.4em] text-slate-600">
           {NAV_LINKS.map(l => <Link key={l.to} to={l.to} className="hover:text-white transition-colors">{l.label}</Link>)}
         </div>
-        <p className="text-xs text-slate-600 font-medium">© 2026 Lithium Tech. Built by a 17-year-old.</p>
+        <p className="text-[10px] font-black text-slate-800 uppercase tracking-[0.5em]">Lithium Project. All Logic Native. © 2026</p>
       </div>
     </footer>
   );

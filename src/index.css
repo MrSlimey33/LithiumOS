@@ -21,7 +21,7 @@
 
 @layer base {
   body {
-    @apply bg-slate-900 text-slate-100 antialiased selection:bg-blue-500/30 font-sans;
+    @apply bg-black text-white antialiased selection:bg-blue-500/30 font-sans;
   }
 }
 
